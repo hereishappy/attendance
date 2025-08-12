@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Attendance Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .loading-spinner {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #3b82f6;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .worker-card {
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+        .worker-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        .high-attendance { border-left-color: #10b981; }
+        .medium-attendance { border-left-color: #f59e0b; }
+        .low-attendance { border-left-color: #ef4444; }
+        .stats-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900">📊 Live Attendance Dashboard</h1>
+                    <p class="text-sm text-gray-600 mt-1">Real-time worker attendance tracking</p>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div id="lastUpdated" class="text-sm text-gray-500"></div>
+                    <button onclick="refreshData()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                        🔄 Refresh
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Loading State -->
+    <div id="loadingState" class="flex items-center justify-center py-20">
+        <div class="text-center">
+            <div class="loading-spinner mx-auto mb-4"></div>
+            <p class="text-gray-600">Loading attendance data...</p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div id="mainContent" class="hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Summary Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+            <div class="stats-card text-white p-6 rounded-xl">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-blue-100 text-sm font-medium">Total Workers</p>
+                        <p id="totalWorkers" class="text-3xl font-bold">-</p>
+                    </div>
+                    <div class="text-4xl opacity-80">👥</div>
+                </div>
+            </div>
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-600 text-sm font-medium">Total Hours</p>
+                        <p id="totalHours" class="text-3xl font-bold text-gray-900">-</p>
+                    </div>
+                    <div class="text-4xl">⏰</div>
+                </div>
+            </div>
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-blue-600 text-sm font-medium">Regular Hours</p>
+                        <p id="totalRegular" class="text-3xl font-bold text-blue-600">-</p>
+                    </div>
+                    <div class="text-4xl">🕐</div>
+                </div>
+            </div>
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-orange-600 text-sm font-medium">Overtime Hours</p>
+                        <p id="totalOvertime" class="text-3xl font-bold text-orange-600">-</p>
+                    </div>
+                    <div class="text-4xl">⏰</div>
+                </div>
+            </div>
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-600 text-sm font-medium">Active Days</p>
+                        <p id="activeDays" class="text-3xl font-bold text-gray-900">-</p>
+                    </div>
+                    <div class="text-4xl">📅</div>
+                </div>
+            </div>
+        </div>
+
+
+
+        <!-- Worker Cards Grid -->
+        <div id="workerCards" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <!-- Cards will be populated by JavaScript -->
+        </div>
+    </div>
+
+    <!-- Worker Details Modal -->
+    <div id="workerModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
+            <div class="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 id="modalWorkerName" class="text-2xl font-bold">Worker Details</h2>
+                        <p id="modalWorkerSummary" class="text-blue-100 mt-1">Attendance Summary</p>
+                    </div>
+                    <button onclick="closeModal()" class="text-white hover:text-gray-200 text-2xl font-bold">×</button>
+                </div>
+            </div>
+            
+            <div class="p-6 overflow-y-auto max-h-[70vh]">
+                <!-- Summary Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                    <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                        <p class="text-blue-600 text-sm font-medium">Total Hours</p>
+                        <p id="modalTotalHours" class="text-2xl font-bold text-blue-700">-</p>
+                    </div>
+                    <div class="bg-green-50 p-4 rounded-lg border border-green-200">
+                        <p class="text-green-600 text-sm font-medium">Regular Hours</p>
+                        <p id="modalRegularHours" class="text-2xl font-bold text-green-700">-</p>
+                    </div>
+                    <div class="bg-orange-50 p-4 rounded-lg border border-orange-200">
+                        <p class="text-orange-600 text-sm font-medium">Overtime Hours</p>
+                        <p id="modalOvertimeHours" class="text-2xl font-bold text-orange-700">-</p>
+                    </div>
+                    <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                        <p class="text-gray-600 text-sm font-medium">Working Days</p>
+                        <p id="modalWorkingDays" class="text-2xl font-bold text-gray-700">-</p>
+                    </div>
+                </div>
+
+                <!-- Daily Attendance Calendar -->
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">📅 Daily Attendance</h3>
+                    <div id="attendanceCalendar" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                        <!-- Calendar will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTRmYg3zmYTdR76pDZirRk3Q-jGChOHtKwW5sRhi9NmaOWjCCvMeGi_CzmtbEVRrVt_u4mgTQmyrjYB/pub?gid=1554768658&single=true&output=csv';
+        const CORS_PROXY = 'https://api.allorigins.win/raw?url=';
+        const FALLBACK_PROXY = 'https://corsproxy.io/?';
+        let attendanceData = [];
+        let filteredData = [];
+
+        // Fetch and parse CSV data
+        async function fetchAttendanceData() {
+            const urls = [
+                CSV_URL, // Try direct first
+                CORS_PROXY + encodeURIComponent(CSV_URL), // Primary CORS proxy
+                FALLBACK_PROXY + encodeURIComponent(CSV_URL) // Fallback proxy
+            ];
+            
+            for (let i = 0; i < urls.length; i++) {
+                try {
+                    console.log(`Attempt ${i + 1}: Fetching data from:`, urls[i]);
+                    const response = await fetch(urls[i]);
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
+                    const csvText = await response.text();
+                    console.log('CSV fetched successfully, length:', csvText.length);
+                    console.log('First 200 chars:', csvText.substring(0, 200));
+                    
+                    if (!csvText || csvText.length < 50) {
+                        throw new Error('CSV data appears to be empty or too short');
+                    }
+                    
+                    const parsedData = parseCSV(csvText);
+                    console.log('Final parsed data:', parsedData);
+                    
+                    if (parsedData.length === 0) {
+                        throw new Error('No valid worker data found in CSV');
+                    }
+                    
+                    // Clear any previous error messages
+                    const existingError = document.querySelector('.bg-red-50');
+                    if (existingError) {
+                        existingError.remove();
+                    }
+                    
+                    return parsedData;
+                } catch (error) {
+                    console.error(`Attempt ${i + 1} failed:`, error);
+                    if (i === urls.length - 1) {
+                        // Last attempt failed, show error
+                        const errorDiv = document.createElement('div');
+                        errorDiv.className = 'bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4';
+                        errorDiv.innerHTML = `
+                            <strong>Data Loading Error:</strong> ${error.message}<br>
+                            <small>Tried multiple methods to fetch data. Please ensure the Google Sheets URL is publicly accessible and contains valid data.</small><br>
+                            <small class="mt-2 block">URL: ${CSV_URL}</small>
+                        `;
+                        const mainContent = document.getElementById('mainContent');
+                        const existingError = mainContent.querySelector('.bg-red-50');
+                        if (existingError) {
+                            existingError.remove();
+                        }
+                        mainContent.prepend(errorDiv);
+                        return [];
+                    }
+                }
+            }
+        }
+
+        // Parse CSV text into structured data
+        function parseCSV(csvText) {
+            console.log('Raw CSV data:', csvText.substring(0, 500)); // Debug log
+            
+            const lines = csvText.trim().split('\n');
+            const workers = [];
+            
+            // Find the header line (contains dates)
+            let headerIndex = -1;
+            for (let i = 0; i < lines.length; i++) {
+                if (lines[i].includes('Aug-2025') || lines[i].includes('WORKER NAME')) {
+                    headerIndex = i;
+                    break;
+                }
+            }
+            
+            if (headerIndex === -1) {
+                console.error('Header not found');
+                return [];
+            }
+            
+            const headers = lines[headerIndex].split(/\t|,/).map(h => h.trim()).filter(h => h);
+            console.log('Headers found:', headers);
+
+            for (let i = headerIndex + 1; i < lines.length; i++) {
+                const values = lines[i].split(/\t|,/).map(v => v.trim());
+                const workerName = values[0];
+                
+                // Skip empty lines, totals, and invalid entries
+                if (!workerName || workerName === '' || 
+                    workerName.includes('Grand Total') || 
+                    workerName === '0' ||
+                    values.length < 3) {
+                    continue;
+                }
+
+                const worker = {
+                    name: workerName,
+                    dailyHours: {},
+                    totalHours: 0
+                };
+
+                // Parse daily hours (skip first column which is name)
+                for (let j = 1; j < Math.min(values.length - 1, headers.length - 1); j++) {
+                    const date = headers[j];
+                    const hoursStr = values[j];
+                    const hours = hoursStr && hoursStr !== '' ? parseFloat(hoursStr) : 0;
+                    
+                    if (date && date !== 'Grand Total') {
+                        worker.dailyHours[date] = hours || 0;
+                    }
+                }
+
+                // Get total from last column or calculate it
+                const lastValue = values[values.length - 1];
+                worker.totalHours = lastValue && !isNaN(parseFloat(lastValue)) ? 
+                    parseFloat(lastValue) : 
+                    Object.values(worker.dailyHours).reduce((sum, hours) => sum + hours, 0);
+                
+                if (worker.totalHours > 0) {
+                    workers.push(worker);
+                    console.log(`Added worker: ${worker.name}, Total: ${worker.totalHours}`);
+                }
+            }
+
+            console.log(`Parsed ${workers.length} workers`);
+            return workers;
+        }
+
+        // Create worker card HTML
+        function createWorkerCard(worker) {
+            const attendanceLevel = worker.totalHours >= 90 ? 'high' : worker.totalHours >= 60 ? 'medium' : 'low';
+            const attendanceColor = attendanceLevel === 'high' ? 'text-green-600' : 
+                                  attendanceLevel === 'medium' ? 'text-yellow-600' : 'text-red-600';
+            const cardClass = `${attendanceLevel}-attendance`;
+
+            const workingDays = Object.values(worker.dailyHours).filter(hours => hours > 0).length;
+            const avgDaily = workingDays > 0 ? (worker.totalHours / workingDays).toFixed(1) : 0;
+
+            // Calculate overtime
+            let regularHours = 0;
+            let overtimeHours = 0;
+            
+            Object.values(worker.dailyHours).forEach(dailyHours => {
+                if (dailyHours > 0) {
+                    if (dailyHours <= 8) {
+                        regularHours += dailyHours;
+                    } else {
+                        regularHours += 8;
+                        overtimeHours += (dailyHours - 8);
+                    }
+                }
+            });
+
+            return `
+                <div class="worker-card ${cardClass} bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-lg transition-all">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="flex-1">
+                            <h3 class="font-semibold text-gray-900 text-lg mb-1">${worker.name}</h3>
+                            <p class="text-sm text-gray-500">Worker ID: ${worker.name.split(' ').map(n => n[0]).join('')}</p>
+                        </div>
+                        <div class="text-2xl">👤</div>
+                    </div>
+                    
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-gray-600">Total Hours</span>
+                            <span class="font-bold text-xl ${attendanceColor}">${worker.totalHours}</span>
+                        </div>
+                        
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-gray-600">Regular Hours</span>
+                            <span class="font-medium text-blue-600">${regularHours.toFixed(1)}</span>
+                        </div>
+                        
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-gray-600">Overtime Hours</span>
+                            <span class="font-medium ${overtimeHours > 0 ? 'text-orange-600' : 'text-gray-400'}">${overtimeHours.toFixed(1)}</span>
+                        </div>
+                        
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-gray-600">Working Days</span>
+                            <span class="font-medium text-gray-900">${workingDays}</span>
+                        </div>
+                        
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-gray-600">Avg Daily</span>
+                            <span class="font-medium text-gray-900">${avgDaily}h</span>
+                        </div>
+                        
+
+                        
+                        ${overtimeHours > 0 ? `
+                        <div class="bg-orange-50 border border-orange-200 rounded-lg p-2 mt-3">
+                            <div class="flex items-center text-orange-700 text-xs">
+                                <span class="mr-1">⏰</span>
+                                <span>Overtime: ${overtimeHours.toFixed(1)} hours</span>
+                            </div>
+                        </div>
+                        ` : ''}
+                    </div>
+                    
+                    <button onclick="showWorkerDetails('${worker.name}')" 
+                            class="w-full mt-4 bg-gray-50 hover:bg-gray-100 text-gray-700 py-2 px-4 rounded-lg text-sm font-medium transition-colors">
+                        View Details
+                    </button>
+                </div>
+            `;
+        }
+
+        // Update summary statistics
+        function updateSummaryStats() {
+            const totalWorkers = attendanceData.length;
+            const totalHours = attendanceData.reduce((sum, worker) => sum + worker.totalHours, 0);
+            
+            // Calculate total regular and overtime hours
+            let totalRegularHours = 0;
+            let totalOvertimeHours = 0;
+            
+            attendanceData.forEach(worker => {
+                Object.values(worker.dailyHours).forEach(dailyHours => {
+                    if (dailyHours > 0) {
+                        if (dailyHours <= 8) {
+                            totalRegularHours += dailyHours;
+                        } else {
+                            totalRegularHours += 8;
+                            totalOvertimeHours += (dailyHours - 8);
+                        }
+                    }
+                });
+            });
+            
+            // Calculate active days from first worker's data
+            const activeDays = attendanceData.length > 0 ? 
+                Object.keys(attendanceData[0].dailyHours).length : 0;
+
+            document.getElementById('totalWorkers').textContent = totalWorkers;
+            document.getElementById('totalHours').textContent = totalHours.toFixed(1);
+            document.getElementById('totalRegular').textContent = totalRegularHours.toFixed(1);
+            document.getElementById('totalOvertime').textContent = totalOvertimeHours.toFixed(1);
+            document.getElementById('activeDays').textContent = activeDays;
+        }
+
+        // Render worker cards
+        function renderWorkerCards(workers = filteredData) {
+            const container = document.getElementById('workerCards');
+            container.innerHTML = workers.map(worker => createWorkerCard(worker)).join('');
+        }
+
+        // Calculate overtime for a worker
+        function calculateOvertime(worker) {
+            let overtimeHours = 0;
+            Object.values(worker.dailyHours).forEach(dailyHours => {
+                if (dailyHours > 8) {
+                    overtimeHours += (dailyHours - 8);
+                }
+            });
+            return overtimeHours;
+        }
+
+        // Display workers (no filtering needed)
+        function displayWorkers() {
+            filteredData = [...attendanceData];
+            renderWorkerCards();
+        }
+
+        // Show worker details in modal
+        function showWorkerDetails(workerName) {
+            const worker = attendanceData.find(w => w.name === workerName);
+            if (!worker) return;
+
+            // Calculate overtime details
+            let regularHours = 0;
+            let overtimeHours = 0;
+            let workingDays = 0;
+            
+            Object.values(worker.dailyHours).forEach(dailyHours => {
+                if (dailyHours > 0) {
+                    workingDays++;
+                    if (dailyHours <= 8) {
+                        regularHours += dailyHours;
+                    } else {
+                        regularHours += 8;
+                        overtimeHours += (dailyHours - 8);
+                    }
+                }
+            });
+
+            // Update modal content
+            document.getElementById('modalWorkerName').textContent = worker.name;
+            document.getElementById('modalWorkerSummary').textContent = `${workingDays} working days • ${worker.totalHours} total hours`;
+            document.getElementById('modalTotalHours').textContent = worker.totalHours.toFixed(1);
+            document.getElementById('modalRegularHours').textContent = regularHours.toFixed(1);
+            document.getElementById('modalOvertimeHours').textContent = overtimeHours.toFixed(1);
+            document.getElementById('modalWorkingDays').textContent = workingDays;
+
+            // Create attendance calendar
+            const calendar = document.getElementById('attendanceCalendar');
+            calendar.innerHTML = '';
+
+            Object.entries(worker.dailyHours).forEach(([date, hours]) => {
+                const dayCard = document.createElement('div');
+                const isPresent = hours > 0;
+                const hasOvertime = hours > 8;
+                const regularHoursForDay = Math.min(hours, 8);
+                const overtimeHoursForDay = Math.max(0, hours - 8);
+
+                dayCard.className = `p-3 rounded-lg border-2 transition-all ${
+                    isPresent 
+                        ? hasOvertime 
+                            ? 'bg-orange-50 border-orange-300 hover:bg-orange-100' 
+                            : 'bg-green-50 border-green-300 hover:bg-green-100'
+                        : 'bg-red-50 border-red-300 hover:bg-red-100'
+                }`;
+
+                dayCard.innerHTML = `
+                    <div class="text-sm font-medium ${
+                        isPresent 
+                            ? hasOvertime ? 'text-orange-700' : 'text-green-700'
+                            : 'text-red-700'
+                    }">${date}</div>
+                    <div class="mt-1">
+                        ${isPresent ? `
+                            <div class="text-lg font-bold ${hasOvertime ? 'text-orange-600' : 'text-green-600'}">
+                                ${hours.toFixed(1)}h
+                            </div>
+                            ${hasOvertime ? `
+                                <div class="text-xs text-gray-600 mt-1">
+                                    Regular: ${regularHoursForDay.toFixed(1)}h<br>
+                                    Overtime: ${overtimeHoursForDay.toFixed(1)}h
+                                </div>
+                            ` : `
+                                <div class="text-xs text-gray-600 mt-1">Regular hours</div>
+                            `}
+                        ` : `
+                            <div class="text-lg font-bold text-red-600">Absent</div>
+                            <div class="text-xs text-gray-600 mt-1">0 hours</div>
+                        `}
+                    </div>
+                    <div class="mt-2 text-xs">
+                        ${isPresent 
+                            ? hasOvertime 
+                                ? '⏰ Overtime' 
+                                : '✅ Present'
+                            : '❌ Absent'
+                        }
+                    </div>
+                `;
+
+                calendar.appendChild(dayCard);
+            });
+
+            // Show modal
+            document.getElementById('workerModal').classList.remove('hidden');
+        }
+
+        // Close modal
+        function closeModal() {
+            document.getElementById('workerModal').classList.add('hidden');
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('workerModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
+        // Refresh data
+        async function refreshData() {
+            document.getElementById('loadingState').classList.remove('hidden');
+            document.getElementById('mainContent').classList.add('hidden');
+            
+            attendanceData = await fetchAttendanceData();
+            filteredData = [...attendanceData];
+            
+            updateSummaryStats();
+            displayWorkers();
+            
+            document.getElementById('lastUpdated').textContent = `Last updated: ${new Date().toLocaleTimeString()}`;
+            document.getElementById('loadingState').classList.add('hidden');
+            document.getElementById('mainContent').classList.remove('hidden');
+        }
+
+        // Initialize dashboard
+        refreshData();
+
+        // Auto-refresh every 5 minutes
+        setInterval(refreshData, 5 * 60 * 1000);
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96df18be439f2e33',t:'MTc1NDk5MjUyMi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
