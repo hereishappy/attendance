@@ -12,19 +12,23 @@
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.umd.min.js"></script>
     <style>
-      /* Minimal clean styles (Tailwind-like feel without dependency) */
-      :root{--bg:#0f1724;--card:#0b1220;--muted:#94a3b8;--accent:#60a5fa}
-      html,body,#root{height:100%;margin:0;background:linear-gradient(180deg,#071024 0%, #071526 100%);color:#e6eef8;font-family:Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial}
-      .container{max-width:1100px;margin:24px auto;padding:16px}
-      .header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
-      .card{background:rgba(255,255,255,0.03);border-radius:12px;padding:14px;box-shadow:0 6px 18px rgba(2,6,23,0.6);}
-      .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-      .kpi{padding:18px;border-radius:10px}
-      .table{width:100%;border-collapse:collapse;margin-top:12px}
-      table th,table td{padding:8px;border-bottom:1px solid rgba(255,255,255,0.03);font-size:13px}
-      .small{font-size:12px;color:var(--muted)}
-      .btn{background:linear-gradient(90deg,var(--accent),#3b82f6);padding:8px 12px;border-radius:8px;color:#04263b;font-weight:600;border:none;cursor:pointer}
-      @media(max-width:900px){.grid{grid-template-columns:repeat(1,1fr)} }
+      :root { --muted:#94a3b8; --accent:#60a5fa }
+      html, body, #root {
+        height: 100%;
+        margin: 0;
+        background: #0f172a;
+        color: #e6eef8;
+        font-family: Inter, system-ui, sans-serif;
+      }
+      .container { max-width: 1100px; margin: 24px auto; padding: 16px; }
+      .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+      .card { background: rgba(255,255,255,0.05); border-radius: 12px; padding: 14px; }
+      .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 12px; }
+      .kpi { padding: 18px; border-radius: 10px; }
+      table { width: 100%; border-collapse: collapse; }
+      th, td { padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.08); font-size: 13px; }
+      .small { font-size: 12px; color: var(--muted); }
+      .btn { background: var(--accent); padding: 8px 12px; border-radius: 8px; color: #04263b; font-weight: 600; border: none; cursor: pointer; }
     </style>
   </head>
   <body>
@@ -34,9 +38,8 @@
       const { useState, useEffect, useRef } = React;
 
       // === CONFIG ===
-      // Replace with your published CSV URL
       const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTRmYg3zmYTdR76pDZirRk3Q-jGChOHtKwW5sRhi9NmaOWjCCvMeGi_CzmtbEVRrVt_u4mgTQmyrjYB/pub?output=csv';
-      const POLL_SECONDS = 30; // fetch interval
+      const POLL_SECONDS = 30;
       // ==============
 
       function useInterval(callback, delay) {
@@ -50,55 +53,49 @@
       }
 
       function parseCsvText(text) {
-        // Use PapaParse to parse and return array of objects if header present
         const parsed = Papa.parse(text.trim(), { header: true, skipEmptyLines: true });
         return parsed.data;
       }
 
       function numberify(v) {
-        if (v === undefined || v === null || v === '') return null;
-        // remove commas, percent signs
+        if (v == null || v === '') return null;
         const cleaned = String(v).replace(/,/g,'').replace(/%/g,'').trim();
         if (!isNaN(cleaned) && cleaned !== '') return Number(cleaned);
         return null;
       }
 
       function KPI({label, value, small}){
-        return (
-          React.createElement('div', {className:'card kpi'},
-            React.createElement('div', {className:'small'}, label),
-            React.createElement('div', {style:{fontSize:28, fontWeight:700, marginTop:8}}, value),
-            small ? React.createElement('div',{className:'small', style:{marginTop:6}}, small) : null
-          )
+        return React.createElement('div', {className:'card kpi'},
+          React.createElement('div', {className:'small'}, label),
+          React.createElement('div', {style:{fontSize:28, fontWeight:700, marginTop:8}}, value),
+          small ? React.createElement('div',{className:'small', style:{marginTop:6}}, small) : null
         );
       }
 
       function TableView({data}){
         if (!data || data.length === 0) return React.createElement('div', null, 'No data');
         const keys = Object.keys(data[0]);
-        return (
-          React.createElement('div', null,
-            React.createElement('table', {className:'table card'},
-              React.createElement('thead', null,
-                React.createElement('tr', null, keys.map(k=>React.createElement('th',{key:k},k)))
-              ),
-              React.createElement('tbody', null,
-                data.map((row,i)=>React.createElement('tr',{key:i}, keys.map(k=>React.createElement('td',{key:k}, row[k]))))
-              )
-            )
+        return React.createElement('table', {className:'card'},
+          React.createElement('thead', null,
+            React.createElement('tr', null, keys.map(k=>React.createElement('th',{key:k},k)))
+          ),
+          React.createElement('tbody', null,
+            data.map((row,i)=>React.createElement('tr',{key:i}, keys.map(k=>React.createElement('td',{key:k}, row[k]))))
           )
         );
       }
 
-      function Chart({id, type, labels, datasets}){
+      function ChartComp({id, type, labels, datasets}){
         const ref = useRef();
         useEffect(()=>{
           if (!labels) return;
           const ctx = ref.current.getContext('2d');
-          let chart = new ChartJS.Chart(ctx, { type, data: { labels, datasets }, options: { responsive:true, maintainAspectRatio:false } });
+          let chart = new Chart(ctx, { type, data: { labels, datasets }, options: { responsive:true, maintainAspectRatio:false } });
           return ()=>{ chart.destroy(); };
         }, [labels?.length]);
-        return React.createElement('div', {className:'card', style:{height:240, padding:10}}, React.createElement('canvas',{ref:ref,id:id}));
+        return React.createElement('div', {className:'card', style:{height:240, padding:10}},
+          React.createElement('canvas',{ref:ref,id:id})
+        );
       }
 
       function App(){
@@ -117,14 +114,14 @@
             setData(parsed);
             setLastUpdated(new Date().toLocaleString());
           }catch(e){
-            console.error(e); setError(String(e));
+            console.error(e);
+            setError(String(e));
           }finally{ setLoading(false); }
         }
 
         useEffect(()=>{ fetchCsv(); }, []);
         useInterval(()=>{ fetchCsv(); }, POLL_SECONDS * 1000);
 
-        // Compute some simple KPIs from numeric columns
         const numericCols = {};
         data.forEach(row=>{
           Object.entries(row).forEach(([k,v])=>{
@@ -136,19 +133,15 @@
           });
         });
 
-        // Choose first numeric column as example time-series (if it looks like date? we won't assume)
         const numericKeys = Object.keys(numericCols);
         const kpiElements = numericKeys.slice(0,3).map(k=>{
           const arr = numericCols[k];
-          const sum = arr.reduce((a,b)=>a+b,0);
-          const avg = (arr.length>0)?(sum/arr.length).toFixed(2):'—';
+          const avg = (arr.length>0)?(arr.reduce((a,b)=>a+b,0)/arr.length).toFixed(2):'—';
           const max = (arr.length>0)?Math.max(...arr):'—';
           return React.createElement(KPI,{key:k,label:k,value:avg,small:`avg • count ${arr.length} • max ${max}`});
         });
 
-        // Prepare chart data: if data has a first column that's likely a date or label
-        let labels = [];
-        let chartDataset = null;
+        let labels = [], chartDataset = null;
         if (data.length>0){
           const keys = Object.keys(data[0]);
           const firstNumericKey = numericKeys[0];
@@ -156,43 +149,40 @@
           if (firstNumericKey) chartDataset = data.map(r=> numberify(r[firstNumericKey]) ?? 0);
         }
 
-        return (
-          React.createElement('div', {className:'container'},
-            React.createElement('div',{className:'header'},
-              React.createElement('div',null, React.createElement('h2',null,'Live Dashboard — Google Sheet CSV (client-side)'), React.createElement('div',{className:'small'}, 'Auto-updates every ' + POLL_SECONDS + 's')),
-              React.createElement('div',null,
-                React.createElement('button',{className:'btn', onClick: fetchCsv}, 'Refresh now')
+        return React.createElement('div', {className:'container'},
+          React.createElement('div',{className:'header'},
+            React.createElement('div',null,
+              React.createElement('h2',null,'Live Dashboard — Google Sheet CSV'),
+              React.createElement('div',{className:'small'}, 'Auto-updates every ' + POLL_SECONDS + 's')
+            ),
+            React.createElement('div',null,
+              React.createElement('button',{className:'btn', onClick: fetchCsv}, 'Refresh now')
+            )
+          ),
+          error ? React.createElement('div', {style:{color:'tomato', marginBottom:12}}, error) : null,
+          React.createElement('div',{className:'grid', style:{marginBottom:12}},
+            kpiElements.length ? kpiElements : React.createElement('div', {className:'card kpi'}, 'No numeric columns found')
+          ),
+          React.createElement('div', {className:'grid'},
+            React.createElement('div', {style:{gridColumn:'span 2'}},
+              React.createElement('div',{className:'card'},
+                React.createElement('h3', null, 'Data table'),
+                loading ? React.createElement('div', null, 'Loading...') : React.createElement(TableView, {data})
               )
             ),
-
-            React.createElement('div',{className:'grid', style:{marginBottom:12}},
-              kpiElements.length? kpiElements : React.createElement('div', {className:'card kpi'}, 'No numeric columns found')
-            ),
-
-            React.createElement('div', {className:'grid'},
-              React.createElement('div', {style:{gridColumn:'span 2'}},
-                React.createElement('div',{className:'card'},
-                  React.createElement('h3', null, 'Data table'),
-                  loading ? React.createElement('div', null, 'Loading...') : error ? React.createElement('div', {style:{color:'tomato'}}, error) : React.createElement(TableView, {data})
-                )
-              ),
-
-              React.createElement('div', null,
-                React.createElement('div',{className:'card'},
-                  React.createElement('h3', null, 'Charts & summary'),
-                  React.createElement('div', {style:{height:260}},
-                    chartDataset ? React.createElement(Chart, {id:'chart1', type:'line', labels:labels, datasets:[{label:numericKeys[0], data:chartDataset, fill:false, tension:0.3}]}) : React.createElement('div', null, 'No chartable numeric column')
-                  ),
-                  React.createElement('div',{className:'small', style:{marginTop:8}}, 'Last updated: ' + (lastUpdated || '—'))
-                )
+            React.createElement('div', null,
+              React.createElement('div',{className:'card'},
+                React.createElement('h3', null, 'Chart'),
+                React.createElement('div', {style:{height:260}},
+                  chartDataset ? React.createElement(ChartComp, {id:'chart1', type:'line', labels:labels, datasets:[{label:numericKeys[0], data:chartDataset, borderColor:'#60a5fa', backgroundColor:'rgba(96,165,250,0.4)', fill:false, tension:0.3}]}) : React.createElement('div', null, 'No numeric data')
+                ),
+                React.createElement('div',{className:'small', style:{marginTop:8}}, 'Last updated: ' + (lastUpdated || '—'))
               )
             )
-
           )
         );
       }
 
-      // Mount
       ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(App));
     </script>
   </body>
