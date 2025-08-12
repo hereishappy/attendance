@@ -1,168 +1,141 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Multi-Sheet Google Dashboard</title>
-  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-  <script src="https://unpkg.com/papaparse@5.4.1/papaparse.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.umd.min.js"></script>
-  <style>
-    body { margin:0; font-family: Inter, sans-serif; background:#0f172a; color:#e6eef8; }
-    .container { max-width: 1200px; margin: 0 auto; padding: 16px; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 16px; }
-    .card { background: rgba(255,255,255,0.05); border-radius: 12px; padding: 16px; }
-    .header { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
-    .kpis { display:flex; gap: 8px; flex-wrap: wrap; }
-    .kpi { background: rgba(255,255,255,0.08); border-radius: 8px; padding: 8px 12px; flex: 1; min-width: 80px; }
-    .small { font-size: 12px; color: #94a3b8; }
-    table { width:100%; border-collapse: collapse; margin-top: 8px; }
-    th, td { border-bottom: 1px solid rgba(255,255,255,0.1); padding: 6px; font-size: 13px; }
-    button { background: #60a5fa; border: none; padding: 6px 10px; border-radius: 6px; font-weight: bold; cursor: pointer; color: #04263b; }
-  </style>
+<meta charset="UTF-8">
+<title>Scaffolding Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<style>
+  body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f4f4f4; }
+  h2 { padding: 15px; margin: 0; color: white; }
+  .section { padding: 20px; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 15px; }
+  .card { background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+  .card h3 { margin: 0 0 10px 0; font-size: 1.1em; }
+  .red { color: red; font-weight: bold; }
+  .blue-bg { background: #007BFF; }
+  .teal-bg { background: #20C997; }
+  .orange-bg { background: #FD7E14; }
+  .purple-bg { background: #6F42C1; }
+  .green-bg { background: #28A745; }
+</style>
 </head>
 <body>
-  <div id="root"></div>
+
+<!-- Section Headers -->
+<div id="sheet1-section">
+  <h2 class="blue-bg">Measurements</h2>
+  <div class="section cards" id="sheet1"></div>
+</div>
+<div id="sheet2-section">
+  <h2 class="teal-bg">Attendance Log</h2>
+  <div class="section cards" id="sheet2"></div>
+</div>
+<div id="sheet3-section">
+  <h2 class="orange-bg">Productivity</h2>
+  <div class="section cards" id="sheet3"></div>
+</div>
+<div id="sheet4-section">
+  <h2 class="purple-bg">Supervisor Performance</h2>
+  <div class="section cards" id="sheet4"></div>
+</div>
+<div id="sheet5-section">
+  <h2 class="green-bg">Final Attendance</h2>
+  <div class="section cards" id="sheet5"></div>
+</div>
 
 <script>
-const { useState, useEffect, useRef } = React;
-
-// === CONFIG ===
+const CORS_PROXY = "https://cors.isomorphic-git.org/";
 const SHEETS = [
-  { name: "Sheet 1", url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTRmYg3zmYTdR76pDZirRk3Q-jGChOHtKwW5sRhi9NmaOWjCCvMeGi_CzmtbEVRrVt_u4mgTQmyrjYB/pub?gid=675931107&single=true&output=csv" },
-  { name: "Sheet 2", url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTRmYg3zmYTdR76pDZirRk3Q-jGChOHtKwW5sRhi9NmaOWjCCvMeGi_CzmtbEVRrVt_u4mgTQmyrjYB/pub?gid=1025965600&single=true&output=csv" },
-  { name: "Sheet 3", url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTRmYg3zmYTdR76pDZirRk3Q-jGChOHtKwW5sRhi9NmaOWjCCvMeGi_CzmtbEVRrVt_u4mgTQmyrjYB/pub?gid=1615191290&single=true&output=csv" },
-  { name: "Sheet 4", url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTRmYg3zmYTdR76pDZirRk3Q-jGChOHtKwW5sRhi9NmaOWjCCvMeGi_CzmtbEVRrVt_u4mgTQmyrjYB/pub?gid=1486071949&single=true&output=csv" },
-  { name: "Sheet 5", url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTRmYg3zmYTdR76pDZirRk3Q-jGChOHtKwW5sRhi9NmaOWjCCvMeGi_CzmtbEVRrVt_u4mgTQmyrjYB/pub?gid=1554768658&single=true&output=csv" },
+  { id: "sheet1", url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTRmYg3zmYTdR76pDZirRk3Q-jGChOHtKwW5sRhi9NmaOWjCCvMeGi_CzmtbEVRrVt_u4mgTQmyrjYB/pub?gid=675931107&single=true&output=csv", type: "measurements" },
+  { id: "sheet2", url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTRmYg3zmYTdR76pDZirRk3Q-jGChOHtKwW5sRhi9NmaOWjCCvMeGi_CzmtbEVRrVt_u4mgTQmyrjYB/pub?gid=1025965600&single=true&output=csv", type: "attendanceLog" },
+  { id: "sheet3", url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTRmYg3zmYTdR76pDZirRk3Q-jGChOHtKwW5sRhi9NmaOWjCCvMeGi_CzmtbEVRrVt_u4mgTQmyrjYB/pub?gid=1615191290&single=true&output=csv", type: "productivity" },
+  { id: "sheet4", url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTRmYg3zmYTdR76pDZirRk3Q-jGChOHtKwW5sRhi9NmaOWjCCvMeGi_CzmtbEVRrVt_u4mgTQmyrjYB/pub?gid=1486071949&single=true&output=csv", type: "supervisorPerf" },
+  { id: "sheet5", url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTRmYg3zmYTdR76pDZirRk3Q-jGChOHtKwW5sRhi9NmaOWjCCvMeGi_CzmtbEVRrVt_u4mgTQmyrjYB/pub?gid=1554768658&single=true&output=csv", type: "finalAttendance" }
 ];
-const POLL_SECONDS = 30;
-// ==============
 
-function useInterval(callback, delay) {
-  const savedRef = useRef();
-  useEffect(() => { savedRef.current = callback; }, [callback]);
-  useEffect(() => {
-    if (delay == null) return;
-    const id = setInterval(() => savedRef.current(), delay);
-    return () => clearInterval(id);
-  }, [delay]);
+function fetchSheet(sheet) {
+  Papa.parse(CORS_PROXY + sheet.url, {
+    download: true,
+    header: true,
+    complete: function(results) {
+      renderSheet(sheet.id, sheet.type, results.data);
+    }
+  });
 }
 
-function parseCsvText(text) {
-  const parsed = Papa.parse(text.trim(), { header: true, skipEmptyLines: true });
-  return parsed.data;
-}
+function renderSheet(containerId, type, data) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = "";
 
-function numberify(v) {
-  if (v == null || v === '') return null;
-  const cleaned = String(v).replace(/,/g,'').replace(/%/g,'').trim();
-  if (!isNaN(cleaned) && cleaned !== '') return Number(cleaned);
-  return null;
-}
-
-function TableView({data}){
-  if (!data || data.length === 0) return React.createElement('div', null, 'No data');
-  const keys = Object.keys(data[0]);
-  return React.createElement('table', null,
-    React.createElement('thead', null,
-      React.createElement('tr', null, keys.map(k=>React.createElement('th',{key:k},k)))
-    ),
-    React.createElement('tbody', null,
-      data.map((row,i)=>React.createElement('tr',{key:i}, keys.map(k=>React.createElement('td',{key:k}, row[k]))))
-    )
-  );
-}
-
-function ChartComp({labels, datasets}){
-  const ref = useRef();
-  useEffect(()=>{
-    if (!labels) return;
-    const ctx = ref.current.getContext('2d');
-    let chart = new Chart(ctx, { type: 'line', data: { labels, datasets }, options: { responsive:true, maintainAspectRatio:false } });
-    return ()=>{ chart.destroy(); };
-  }, [labels?.length]);
-  return React.createElement('div', {style:{height:200, marginTop:10}},
-    React.createElement('canvas',{ref:ref})
-  );
-}
-
-function SheetCard({name, url}){
-  const [data, setData] = useState([]);
-  const [lastUpdated, setLastUpdated] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-
-  async function fetchCsv(){
-    try{
-      setLoading(true); setError(null);
-      const r = await fetch(url + '&_=' + Date.now());
-      if (!r.ok) throw new Error('Failed to fetch CSV: ' + r.status);
-      const text = await r.text();
-      const parsed = parseCsvText(text);
-      setData(parsed);
-      setLastUpdated(new Date().toLocaleString());
-    }catch(e){
-      console.error(e);
-      setError(String(e));
-    }finally{ setLoading(false); }
-  }
-
-  useEffect(()=>{ fetchCsv(); }, []);
-  useInterval(()=>{ fetchCsv(); }, POLL_SECONDS * 1000);
-
-  // KPIs
-  const numericCols = {};
-  data.forEach(row=>{
-    Object.entries(row).forEach(([k,v])=>{
-      const n = numberify(v);
-      if (n !== null) {
-        if (!numericCols[k]) numericCols[k] = [];
-        numericCols[k].push(n);
-      }
+  if (type === "measurements") {
+    data.forEach(row => {
+      container.innerHTML += `<div class="card"><h3>${row.Date || 'No Date'}</h3><p>Project: ${row.Project || ''}</p><p>Measurement: ${row.Measurement || ''}</p></div>`;
     });
-  });
-  const numericKeys = Object.keys(numericCols);
-  const kpiEls = numericKeys.slice(0,3).map(k=>{
-    const arr = numericCols[k];
-    const avg = (arr.length>0)?(arr.reduce((a,b)=>a+b,0)/arr.length).toFixed(2):'—';
-    const max = (arr.length>0)?Math.max(...arr):'—';
-    return React.createElement('div', {key:k, className:'kpi'},
-      React.createElement('div',{className:'small'}, k),
-      React.createElement('div', {style:{fontSize:20, fontWeight:700}}, avg),
-      React.createElement('div',{className:'small'}, `max: ${max}`)
-    );
-  });
-
-  // Chart
-  let labels = [], chartDataset = null;
-  if (data.length>0 && numericKeys.length>0){
-    const keys = Object.keys(data[0]);
-    labels = data.map((r,i)=> r[keys[0]] || i+1 );
-    chartDataset = data.map(r=> numberify(r[numericKeys[0]]) ?? 0);
   }
 
-  return React.createElement('div', {className:'card'},
-    React.createElement('div', {className:'header'},
-      React.createElement('h3', null, name),
-      React.createElement('button', {onClick: fetchCsv}, 'Refresh')
-    ),
-    error ? React.createElement('div', {style:{color:'tomato'}}, error) : null,
-    React.createElement('div',{className:'kpis'}, kpiEls.length?kpiEls:React.createElement('div',null,'No numeric data')),
-    chartDataset ? React.createElement(ChartComp, {labels: labels, datasets:[{label:numericKeys[0], data:chartDataset, borderColor:'#60a5fa', backgroundColor:'rgba(96,165,250,0.4)', fill:false, tension:0.3}]}) : null,
-    loading ? React.createElement('div',null,'Loading...') : React.createElement(TableView, {data}),
-    React.createElement('div',{className:'small', style:{marginTop:6}}, 'Last updated: ' + (lastUpdated || '—'))
-  );
+  if (type === "attendanceLog") {
+    data.forEach(row => {
+      container.innerHTML += `<div class="card">
+        <h3>${row["WORKER NAME"] || ''}</h3>
+        <p>Date: ${row.DATE || ''}</p>
+        <p>Supervisor: ${row["SUPERVISOR NAME"] || ''}</p>
+        <p>Total Hours: ${row["TOTAL MANHOURS"] || ''}</p>
+        <p class="${row["OT HOURS"] > 0 ? 'red' : ''}">OT Hours: ${row["OT HOURS"] || 0}</p>
+      </div>`;
+    });
+  }
+
+  if (type === "productivity") {
+    data.forEach(row => {
+      container.innerHTML += `<div class="card">
+        <h3>${row.Date || ''}</h3>
+        <p>Productivity: ${row.Productivity || ''}</p>
+        <p>Target: ${row.Target || ''}</p>
+      </div>`;
+    });
+  }
+
+  if (type === "supervisorPerf") {
+    data.forEach(row => {
+      container.innerHTML += `<div class="card">
+        <h3>${row["SUPERVISOR NAME"] || ''}</h3>
+        <p>Avg Hours: ${row["Avg Hours"] || ''}</p>
+        <p>Avg OT: ${row["Avg OT"] || ''}</p>
+      </div>`;
+    });
+  }
+
+  if (type === "finalAttendance") {
+    data.forEach(row => {
+      let totalPresent = 0;
+      let totalOT = 0;
+      let totalHours = 0;
+      Object.keys(row).forEach(col => {
+        if (col !== "WORKER NAME" && col !== "Grand Total" && row[col]) {
+          let hrs = parseFloat(row[col]);
+          if (!isNaN(hrs)) {
+            totalHours += hrs;
+            if (hrs === 8) totalPresent++;
+            if (hrs > 8) totalOT += (hrs - 8);
+          }
+        }
+      });
+      container.innerHTML += `<div class="card">
+        <h3>${row["WORKER NAME"] || ''}</h3>
+        <p>Present Days: ${totalPresent}</p>
+        <p class="${totalOT > 0 ? 'red' : ''}">Total OT Hours: ${totalOT}</p>
+        <p>Total Hours: ${totalHours}</p>
+      </div>`;
+    });
+  }
 }
 
-function App(){
-  return React.createElement('div', {className:'container'},
-    React.createElement('h2', null, 'Multi-Sheet Google Dashboard'),
-    React.createElement('div', {className:'grid'}, SHEETS.map(s=>React.createElement(SheetCard, {key:s.name, name:s.name, url:s.url})))
-  );
+function loadAllSheets() {
+  SHEETS.forEach(s => fetchSheet(s));
 }
 
-ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(App));
+loadAllSheets();
+setInterval(loadAllSheets, 30000); // Refresh every 30 seconds
 </script>
 </body>
 </html>
