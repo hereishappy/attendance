@@ -192,9 +192,13 @@
             color: #adb5bd;
         }
 
-        .calendar-cell.today {
-            background: #e3f2fd;
-            border: 2px solid #2196f3;
+        .calendar-cell.present {
+            background: #d4edda !important;
+            border: 2px solid #28a745;
+        }
+
+        .calendar-cell.present:hover {
+            background: #c3e6cb !important;
         }
 
         .date-number {
@@ -212,19 +216,24 @@
             min-width: 20px;
         }
 
+        .calendar-cell.today {
+            background: #e3f2fd;
+            border: 2px solid #2196f3;
+        }
+
+        .calendar-cell.today.present {
+            background: #c8e6c9 !important;
+            border: 2px solid #28a745;
+        }
+
         .present {
-            background: #d4edda;
-            color: #155724;
+            background: #155724;
+            color: white;
         }
 
         .absent {
             background: #f8d7da;
             color: #721c24;
-        }
-
-        .overtime {
-            background: #fff3cd;
-            color: #856404;
         }
 
         .loading {
@@ -673,11 +682,12 @@
                 for (let day = 1; day <= daysInMonth; day++) {
                     const currentDay = new Date(year, month, day);
                     const isToday = currentDay.toDateString() === today.toDateString();
-                    
                     const attendanceRecord = this.getAttendanceForDate(currentDay);
                     let attendanceBadge = '';
+                    let isPresent = false;
                     
                     if (attendanceRecord) {
+                        isPresent = true;
                         // If worker has any record for this date, mark as present
                         const endShift = attendanceRecord.endShiftHours;
                         if (endShift && endShift >= 12) {
@@ -692,8 +702,12 @@
                         }
                     }
 
+                    const cellClasses = ['calendar-cell'];
+                    if (isToday) cellClasses.push('today');
+                    if (isPresent) cellClasses.push('present');
+
                     calendarHTML += `
-                        <div class="calendar-cell ${isToday ? 'today' : ''}">
+                        <div class="${cellClasses.join(' ')}">
                             <div class="date-number">${day}</div>
                             ${attendanceBadge}
                         </div>
