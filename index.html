@@ -15,465 +15,730 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            padding: 20px;
+            padding: 10px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
         }
 
         .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            padding: 20px;
             text-align: center;
             color: white;
-            margin-bottom: 30px;
         }
 
         .header h1 {
-            font-size: 2.5rem;
+            font-size: 2rem;
             margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
 
-        .header p {
-            font-size: 1.1rem;
-            opacity: 0.9;
+        .search-container {
+            padding: 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
         }
 
-        .loading {
-            text-align: center;
-            color: white;
-            font-size: 1.2rem;
-            margin: 50px 0;
+        .search-box {
+            width: 100%;
+            padding: 15px 20px;
+            font-size: 16px;
+            border: 2px solid #ddd;
+            border-radius: 50px;
+            outline: none;
+            transition: all 0.3s ease;
+            background: white;
         }
 
-        .error {
-            background: #ff4757;
-            color: white;
-            padding: 15px;
-            border-radius: 10px;
-            margin: 20px 0;
-            text-align: center;
-        }
-
-        .dashboard {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 20px;
-            max-width: 1400px;
-            margin: 0 auto;
+        .search-box:focus {
+            border-color: #4facfe;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
         }
 
         .worker-card {
+            margin: 20px;
             background: white;
             border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .worker-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            overflow: hidden;
+            border: 1px solid #e9ecef;
         }
 
         .worker-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
             text-align: center;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid #f1f2f6;
         }
 
         .worker-name {
-            font-size: 1.4rem;
+            font-size: 1.5rem;
             font-weight: bold;
-            color: #2f3542;
-            margin-bottom: 5px;
+            margin-bottom: 10px;
         }
 
         .worker-stats {
-            display: flex;
-            justify-content: space-around;
-            margin-bottom: 15px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
         }
 
-        .stat {
+        .stat-item {
+            background: rgba(255,255,255,0.2);
+            padding: 10px;
+            border-radius: 10px;
             text-align: center;
         }
 
-        .stat-number {
-            font-size: 1.5rem;
+        .stat-value {
+            font-size: 1.2rem;
             font-weight: bold;
-            color: #5f27cd;
         }
 
         .stat-label {
-            font-size: 0.8rem;
-            color: #747d8c;
-            text-transform: uppercase;
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .calendar-container {
+            padding: 20px;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .month-nav {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .nav-btn {
+            background: #4facfe;
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn:hover {
+            background: #667eea;
+            transform: scale(1.1);
+        }
+
+        .month-year {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #333;
+            min-width: 150px;
+            text-align: center;
         }
 
         .calendar-grid {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
-            gap: 3px;
-            margin-top: 15px;
+            gap: 2px;
+            background: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
         }
 
-        .calendar-header {
+        .calendar-header-cell {
+            background: #495057;
+            color: white;
+            padding: 12px 8px;
             text-align: center;
             font-weight: bold;
-            color: #2f3542;
-            padding: 8px 4px;
-            font-size: 0.8rem;
+            font-size: 0.9rem;
         }
 
-        .calendar-day {
-            aspect-ratio: 1;
+        .calendar-cell {
+            background: white;
+            min-height: 60px;
+            padding: 8px 4px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            border-radius: 6px;
-            font-size: 0.7rem;
-            font-weight: bold;
+            justify-content: flex-start;
+            position: relative;
             cursor: pointer;
             transition: all 0.2s ease;
-            position: relative;
         }
 
-        .calendar-day:hover {
-            transform: scale(1.1);
+        .calendar-cell:hover {
+            background: #f8f9fa;
         }
 
-        .calendar-day.empty {
-            color: #ddd;
+        .calendar-cell.other-month {
+            background: #f8f9fa;
+            color: #adb5bd;
         }
 
-        .calendar-day.present {
-            background: #2ed573;
-            color: white;
+        .calendar-cell.today {
+            background: #e3f2fd;
+            border: 2px solid #2196f3;
         }
 
-        .calendar-day.absent {
-            background: #ff4757;
-            color: white;
-        }
-
-        .calendar-day.partial {
-            background: #ffa502;
-            color: white;
-        }
-
-        .ot-indicator {
-            font-size: 0.6rem;
-            margin-top: 1px;
-        }
-
-        .month-nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-
-        .month-nav button {
-            background: #5f27cd;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            padding: 5px 10px;
-            cursor: pointer;
-            font-size: 0.8rem;
-        }
-
-        .month-nav button:hover {
-            background: #341f97;
-        }
-
-        .current-month {
+        .date-number {
             font-weight: bold;
-            color: #2f3542;
+            margin-bottom: 4px;
+            font-size: 0.9rem;
+        }
+
+        .attendance-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            text-align: center;
+            min-width: 30px;
+        }
+
+        .present {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .absent {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .overtime {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+        }
+
+        .error {
+            text-align: center;
+            padding: 40px;
+            color: #dc3545;
+            background: #f8d7da;
+            margin: 20px;
+            border-radius: 10px;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+        }
+
+        .worker-list {
+            padding: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .worker-suggestion {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .worker-suggestion:hover {
+            background: #e9ecef;
+            border-color: #4facfe;
+            transform: translateY(-2px);
+        }
+
+        .worker-suggestion-name {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .worker-suggestion-count {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-top: 5px;
         }
 
         @media (max-width: 768px) {
-            .dashboard {
-                grid-template-columns: 1fr;
-                gap: 15px;
-            }
-            
             .header h1 {
-                font-size: 2rem;
+                font-size: 1.5rem;
             }
             
-            .worker-card {
-                padding: 15px;
+            .calendar-cell {
+                min-height: 50px;
+                padding: 4px 2px;
             }
             
-            .calendar-day {
-                font-size: 0.6rem;
+            .date-number {
+                font-size: 0.8rem;
+            }
+            
+            .attendance-badge {
+                font-size: 0.7rem;
+                padding: 2px 6px;
+            }
+            
+            .month-year {
+                font-size: 1.1rem;
+            }
+            
+            .nav-btn {
+                width: 35px;
+                height: 35px;
+                font-size: 16px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .calendar-header-cell {
+                padding: 8px 4px;
+                font-size: 0.8rem;
+            }
+            
+            .calendar-cell {
+                min-height: 45px;
+            }
+            
+            .worker-stats {
+                grid-template-columns: repeat(2, 1fr);
             }
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>📊 Worker Attendance Dashboard</h1>
-        <p>Live attendance tracking with calendar view</p>
-    </div>
-
-    <div id="loading" class="loading">
-        Loading attendance data...
-    </div>
-
-    <div id="error" class="error" style="display: none;">
-        Unable to load data. Please check your CSV link and try again.
-    </div>
-
-    <div id="dashboard" class="dashboard" style="display: none;">
+    <div class="container">
+        <div class="header">
+            <h1>🏢 Worker Attendance Dashboard</h1>
+            <p>Search for a worker to view their attendance calendar</p>
+        </div>
+        
+        <div class="search-container">
+            <input type="text" class="search-box" id="searchInput" placeholder="🔍 Search worker name..." autocomplete="off">
+        </div>
+        
+        <div id="content">
+            <div class="loading">
+                <div style="font-size: 2rem; margin-bottom: 10px;">⏳</div>
+                Loading worker data...
+            </div>
+        </div>
     </div>
 
     <script>
-        // Your live Google Sheets CSV URL
-        const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTRmYg3zmYTdR76pDZirRk3Q-jGChOHtKwW5sRhi9NmaOWjCCvMeGi_CzmtbEVRrVt_u4mgTQmyrjYB/pub?gid=1025965600&single=true&output=csv';
-        
-        let attendanceData = [];
-        let currentMonth = new Date().getMonth();
-        let currentYear = new Date().getFullYear();
-
-        // Month names
-        const monthNames = [
-            'January', 'February', 'March', 'April', 'May', 'June',
-            'July', 'August', 'September', 'October', 'November', 'December'
-        ];
-
-        // Day names
-        const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-
-        async function loadAttendanceData() {
-            try {
-                const response = await fetch(CSV_URL);
-                const csvText = await response.text();
-                attendanceData = parseCSV(csvText);
+        class AttendanceDashboard {
+            constructor() {
+                this.csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTRmYg3zmYTdR76pDZirRk3Q-jGChOHtKwW5sRhi9NmaOWjCCvMeGi_CzmtbEVRrVt_u4mgTQmyrjYB/pub?gid=1025965600&single=true&output=csv';
+                this.attendanceData = [];
+                this.workerNames = [];
+                this.currentWorker = null;
+                this.currentDate = new Date();
                 
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('dashboard').style.display = 'grid';
-                renderDashboard();
-            } catch (error) {
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('error').style.display = 'block';
-                console.error('Error loading data:', error);
+                this.init();
             }
-        }
 
-        function parseCSV(csvText) {
-            const lines = csvText.trim().split('\n');
-            const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
-            const data = [];
-            
-            for (let i = 1; i < lines.length; i++) {
-                const values = lines[i].split(',').map(v => v.trim().replace(/"/g, ''));
-                if (values.length >= 6) {
-                    const record = {
-                        date: values[0],
-                        supervisorName: values[1],
-                        workerName: values[2],
-                        totalManhours: parseFloat(values[3]) || 0,
-                        otHours: parseFloat(values[4]) || 0,
-                        endShiftManhours: parseFloat(values[5]) || 0
-                    };
-                    
-                    // Convert date format if needed
-                    if (record.date && record.workerName) {
-                        data.push(record);
-                    }
+            async init() {
+                try {
+                    await this.loadData();
+                    this.setupEventListeners();
+                    this.showWorkerList();
+                } catch (error) {
+                    this.showError('Failed to load attendance data. Please check your internet connection and try again.');
+                    console.error('Initialization error:', error);
                 }
             }
-            
-            return data;
-        }
 
-        function generateSampleData() {
-            const workers = [
-                'John Smith', 'Maria Garcia', 'David Johnson', 'Sarah Wilson', 'Michael Brown',
-                'Lisa Davis', 'Robert Miller', 'Jennifer Taylor', 'William Anderson', 'Jessica Thomas'
-            ];
-            
-            const supervisors = ['Tom Manager', 'Jane Supervisor', 'Bob Leader'];
-            const data = [];
-            
-            // Generate data for the last 30 days
-            for (let i = 0; i < 30; i++) {
-                const date = new Date();
-                date.setDate(date.getDate() - i);
-                
-                workers.forEach(worker => {
-                    // 85% chance of attendance
-                    if (Math.random() > 0.15) {
-                        const totalHours = 8 + Math.floor(Math.random() * 5); // 8-12 hours
-                        const otHours = Math.max(0, totalHours - 8);
+            async loadData() {
+                try {
+                    const response = await fetch(this.csvUrl + '&_=' + Date.now());
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    const csvText = await response.text();
+                    this.parseCSV(csvText);
+                } catch (error) {
+                    console.error('Error loading data:', error);
+                    throw error;
+                }
+            }
+
+            parseCSV(csvText) {
+                const lines = csvText.trim().split('\n');
+                if (lines.length < 2) {
+                    throw new Error('Invalid CSV format');
+                }
+
+                // Skip header row
+                const dataLines = lines.slice(1);
+                this.attendanceData = [];
+                const workerSet = new Set();
+
+                dataLines.forEach((line, index) => {
+                    try {
+                        // Handle CSV parsing with potential commas in quoted fields
+                        const fields = this.parseCSVLine(line);
                         
-                        data.push({
-                            date: date.toISOString().split('T')[0],
-                            supervisorName: supervisors[Math.floor(Math.random() * supervisors.length)],
-                            workerName: worker,
-                            totalManhours: totalHours,
-                            otHours: otHours,
-                            endShiftManhours: totalHours
-                        });
+                        if (fields.length >= 7) {
+                            const record = {
+                                date: this.parseDate(fields[0]),
+                                supervisor: fields[1]?.trim() || '',
+                                workerName: fields[2]?.trim() || '',
+                                totalManhours: parseFloat(fields[3]) || 0,
+                                otHours: parseFloat(fields[4]) || 0,
+                                endShiftHours: parseFloat(fields[5]) || 0,
+                                manhours: parseFloat(fields[6]) || 0
+                            };
+
+                            if (record.workerName && record.date) {
+                                this.attendanceData.push(record);
+                                workerSet.add(record.workerName);
+                            }
+                        }
+                    } catch (error) {
+                        console.warn(`Error parsing line ${index + 2}:`, error);
                     }
                 });
+
+                this.workerNames = Array.from(workerSet).sort();
+                console.log(`Loaded ${this.attendanceData.length} attendance records for ${this.workerNames.length} workers`);
             }
-            
-            return data;
-        }
 
-        function renderDashboard() {
-            const dashboard = document.getElementById('dashboard');
-            const workers = [...new Set(attendanceData.map(record => record.workerName))];
-            
-            dashboard.innerHTML = '';
-            
-            workers.forEach(worker => {
-                const workerCard = createWorkerCard(worker);
-                dashboard.appendChild(workerCard);
-            });
-        }
-
-        function createWorkerCard(workerName) {
-            const workerData = attendanceData.filter(record => record.workerName === workerName);
-            
-            // Calculate stats
-            const totalDays = workerData.length;
-            const totalOT = workerData.reduce((sum, record) => sum + (record.otHours || 0), 0);
-            const avgHours = totalDays > 0 ? (workerData.reduce((sum, record) => sum + record.totalManhours, 0) / totalDays).toFixed(1) : 0;
-            
-            const card = document.createElement('div');
-            card.className = 'worker-card';
-            
-            card.innerHTML = `
-                <div class="worker-header">
-                    <div class="worker-name">${workerName}</div>
-                </div>
+            parseCSVLine(line) {
+                const fields = [];
+                let current = '';
+                let inQuotes = false;
                 
-                <div class="worker-stats">
-                    <div class="stat">
-                        <div class="stat-number">${totalDays}</div>
-                        <div class="stat-label">Days</div>
-                    </div>
-                    <div class="stat">
-                        <div class="stat-number">${totalOT}</div>
-                        <div class="stat-label">OT Hours</div>
-                    </div>
-                    <div class="stat">
-                        <div class="stat-number">${avgHours}</div>
-                        <div class="stat-label">Avg Hours</div>
-                    </div>
-                </div>
-                
-                <div class="month-nav">
-                    <button onclick="changeMonth('${workerName}', -1)">‹</button>
-                    <div class="current-month">${monthNames[currentMonth]} ${currentYear}</div>
-                    <button onclick="changeMonth('${workerName}', 1)">›</button>
-                </div>
-                
-                <div class="calendar-grid" id="calendar-${workerName.replace(/\s+/g, '')}">
-                    ${generateCalendar(workerName, currentMonth, currentYear)}
-                </div>
-            `;
-            
-            return card;
-        }
-
-        function generateCalendar(workerName, month, year) {
-            const firstDay = new Date(year, month, 1);
-            const lastDay = new Date(year, month + 1, 0);
-            const startDate = new Date(firstDay);
-            startDate.setDate(startDate.getDate() - firstDay.getDay());
-            
-            let html = '';
-            
-            // Add day headers
-            dayNames.forEach(day => {
-                html += `<div class="calendar-header">${day}</div>`;
-            });
-            
-            // Generate calendar days
-            const currentDate = new Date(startDate);
-            for (let i = 0; i < 42; i++) { // 6 weeks
-                const dateStr = currentDate.toISOString().split('T')[0];
-                const isCurrentMonth = currentDate.getMonth() === month;
-                const dayNum = currentDate.getDate();
-                
-                let dayClass = 'calendar-day';
-                let content = dayNum;
-                let otIndicator = '';
-                
-                if (!isCurrentMonth) {
-                    dayClass += ' empty';
-                    content = '';
-                } else {
-                    const attendance = attendanceData.find(record => {
-                        const recordDate = new Date(record.date);
-                        const currentCalendarDate = new Date(currentDate);
-                        return record.workerName === workerName && 
-                               recordDate.toDateString() === currentCalendarDate.toDateString();
-                    });
+                for (let i = 0; i < line.length; i++) {
+                    const char = line[i];
                     
-                    if (attendance) {
-                        const hours = attendance.endShiftManhours;
-                        const otHours = attendance.otHours || 0;
-                        
-                        if (hours >= 8) {
-                            dayClass += ' present';
-                            // Show P + overtime hours (like P4 for 4 hours OT)
-                            if (otHours > 0) {
-                                otIndicator = `<div class="ot-indicator">P${otHours}</div>`;
-                            } else {
-                                otIndicator = `<div class="ot-indicator">P</div>`;
-                            }
-                        } else if (hours > 0) {
-                            dayClass += ' partial';
-                            otIndicator = `<div class="ot-indicator">${hours}h</div>`;
-                        }
+                    if (char === '"') {
+                        inQuotes = !inQuotes;
+                    } else if (char === ',' && !inQuotes) {
+                        fields.push(current);
+                        current = '';
                     } else {
-                        // Check if it's a future date or weekend
-                        const today = new Date();
-                        today.setHours(0, 0, 0, 0);
-                        const checkDate = new Date(currentDate);
-                        checkDate.setHours(0, 0, 0, 0);
-                        
-                        if (checkDate <= today) {
-                            dayClass += ' absent';
-                        }
+                        current += char;
                     }
                 }
                 
-                html += `<div class="${dayClass}">${content}${otIndicator}</div>`;
-                currentDate.setDate(currentDate.getDate() + 1);
+                fields.push(current);
+                return fields;
             }
-            
-            return html;
+
+            parseDate(dateStr) {
+                if (!dateStr) return null;
+                
+                // Try different date formats
+                const cleanDate = dateStr.trim().replace(/"/g, '');
+                
+                // MM/DD/YYYY or M/D/YYYY
+                const mmddyyyy = cleanDate.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+                if (mmddyyyy) {
+                    return new Date(mmddyyyy[3], mmddyyyy[1] - 1, mmddyyyy[2]);
+                }
+                
+                // DD/MM/YYYY or D/M/YYYY
+                const ddmmyyyy = cleanDate.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+                if (ddmmyyyy) {
+                    // Assume MM/DD/YYYY format first
+                    const date = new Date(ddmmyyyy[3], ddmmyyyy[1] - 1, ddmmyyyy[2]);
+                    if (date.getMonth() === parseInt(ddmmyyyy[1]) - 1) {
+                        return date;
+                    }
+                }
+                
+                // Try parsing as is
+                const parsed = new Date(cleanDate);
+                return isNaN(parsed.getTime()) ? null : parsed;
+            }
+
+            setupEventListeners() {
+                const searchInput = document.getElementById('searchInput');
+                let searchTimeout;
+
+                searchInput.addEventListener('input', (e) => {
+                    clearTimeout(searchTimeout);
+                    searchTimeout = setTimeout(() => {
+                        const query = e.target.value.trim();
+                        if (query.length === 0) {
+                            this.showWorkerList();
+                        } else if (query.length >= 2) {
+                            this.searchWorker(query);
+                        }
+                    }, 300);
+                });
+
+                // Refresh data every 5 minutes
+                setInterval(() => {
+                    this.loadData().catch(console.error);
+                }, 5 * 60 * 1000);
+            }
+
+            showWorkerList() {
+                const content = document.getElementById('content');
+                const workerCounts = {};
+                
+                // Count attendance records per worker
+                this.attendanceData.forEach(record => {
+                    workerCounts[record.workerName] = (workerCounts[record.workerName] || 0) + 1;
+                });
+
+                content.innerHTML = `
+                    <div class="worker-list">
+                        ${this.workerNames.map(name => `
+                            <div class="worker-suggestion" onclick="dashboard.selectWorker('${name}')">
+                                <div class="worker-suggestion-name">${name}</div>
+                                <div class="worker-suggestion-count">${workerCounts[name] || 0} attendance records</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+
+            searchWorker(query) {
+                const matches = this.workerNames.filter(name => 
+                    name.toLowerCase().includes(query.toLowerCase())
+                );
+
+                if (matches.length === 0) {
+                    document.getElementById('content').innerHTML = `
+                        <div class="no-results">
+                            <div style="font-size: 3rem; margin-bottom: 15px;">👤</div>
+                            <h3>No worker found</h3>
+                            <p>No worker found with name containing "${query}"</p>
+                        </div>
+                    `;
+                } else if (matches.length === 1) {
+                    this.selectWorker(matches[0]);
+                } else {
+                    const workerCounts = {};
+                    this.attendanceData.forEach(record => {
+                        workerCounts[record.workerName] = (workerCounts[record.workerName] || 0) + 1;
+                    });
+
+                    document.getElementById('content').innerHTML = `
+                        <div class="worker-list">
+                            ${matches.map(name => `
+                                <div class="worker-suggestion" onclick="dashboard.selectWorker('${name}')">
+                                    <div class="worker-suggestion-name">${name}</div>
+                                    <div class="worker-suggestion-count">${workerCounts[name] || 0} attendance records</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                }
+            }
+
+            selectWorker(workerName) {
+                this.currentWorker = workerName;
+                document.getElementById('searchInput').value = workerName;
+                this.showWorkerCard();
+            }
+
+            showWorkerCard() {
+                if (!this.currentWorker) return;
+
+                const workerData = this.attendanceData.filter(record => 
+                    record.workerName === this.currentWorker
+                );
+
+                if (workerData.length === 0) {
+                    document.getElementById('content').innerHTML = `
+                        <div class="no-results">
+                            <div style="font-size: 3rem; margin-bottom: 15px;">📋</div>
+                            <h3>No attendance data</h3>
+                            <p>No attendance records found for ${this.currentWorker}</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Calculate statistics
+                const totalDays = workerData.length;
+                const totalOT = workerData.reduce((sum, record) => sum + record.otHours, 0);
+                const totalManhours = workerData.reduce((sum, record) => sum + record.totalManhours, 0);
+                const avgHours = totalManhours / totalDays;
+
+                document.getElementById('content').innerHTML = `
+                    <div class="worker-card">
+                        <div class="worker-header">
+                            <div class="worker-name">${this.currentWorker}</div>
+                            <div class="worker-stats">
+                                <div class="stat-item">
+                                    <div class="stat-value">${totalDays}</div>
+                                    <div class="stat-label">Total Days</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value">${totalOT.toFixed(1)}h</div>
+                                    <div class="stat-label">Total OT</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value">${totalManhours.toFixed(1)}h</div>
+                                    <div class="stat-label">Total Hours</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value">${avgHours.toFixed(1)}h</div>
+                                    <div class="stat-label">Avg Hours/Day</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="calendar-container">
+                            <div class="calendar-header">
+                                <div class="month-nav">
+                                    <button class="nav-btn" onclick="dashboard.changeMonth(-1)">‹</button>
+                                    <div class="month-year" id="monthYear"></div>
+                                    <button class="nav-btn" onclick="dashboard.changeMonth(1)">›</button>
+                                </div>
+                            </div>
+                            <div class="calendar-grid" id="calendarGrid"></div>
+                        </div>
+                    </div>
+                `;
+
+                this.renderCalendar();
+            }
+
+            changeMonth(direction) {
+                this.currentDate.setMonth(this.currentDate.getMonth() + direction);
+                this.renderCalendar();
+            }
+
+            renderCalendar() {
+                const monthYear = document.getElementById('monthYear');
+                const calendarGrid = document.getElementById('calendarGrid');
+                
+                if (!monthYear || !calendarGrid) return;
+
+                const year = this.currentDate.getFullYear();
+                const month = this.currentDate.getMonth();
+                
+                monthYear.textContent = new Date(year, month).toLocaleDateString('en-US', { 
+                    month: 'long', 
+                    year: 'numeric' 
+                });
+
+                // Get calendar data
+                const firstDay = new Date(year, month, 1);
+                const lastDay = new Date(year, month + 1, 0);
+                const daysInMonth = lastDay.getDate();
+                const startDayOfWeek = firstDay.getDay();
+
+                // Get previous month days
+                const prevMonth = new Date(year, month - 1, 0);
+                const daysInPrevMonth = prevMonth.getDate();
+
+                let calendarHTML = `
+                    <div class="calendar-header-cell">Sun</div>
+                    <div class="calendar-header-cell">Mon</div>
+                    <div class="calendar-header-cell">Tue</div>
+                    <div class="calendar-header-cell">Wed</div>
+                    <div class="calendar-header-cell">Thu</div>
+                    <div class="calendar-header-cell">Fri</div>
+                    <div class="calendar-header-cell">Sat</div>
+                `;
+
+                // Previous month days
+                for (let i = startDayOfWeek - 1; i >= 0; i--) {
+                    const day = daysInPrevMonth - i;
+                    calendarHTML += `
+                        <div class="calendar-cell other-month">
+                            <div class="date-number">${day}</div>
+                        </div>
+                    `;
+                }
+
+                // Current month days
+                const today = new Date();
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const currentDay = new Date(year, month, day);
+                    const isToday = currentDay.toDateString() === today.toDateString();
+                    
+                    const attendanceRecord = this.getAttendanceForDate(currentDay);
+                    let attendanceBadge = '';
+                    
+                    if (attendanceRecord) {
+                        const endShift = attendanceRecord.endShiftHours;
+                        if (endShift >= 12) {
+                            const otHours = Math.floor(endShift - 8);
+                            attendanceBadge = `<div class="attendance-badge present">P${otHours > 0 ? otHours : ''}</div>`;
+                        } else if (endShift > 0) {
+                            attendanceBadge = `<div class="attendance-badge present">P</div>`;
+                        }
+                    }
+
+                    calendarHTML += `
+                        <div class="calendar-cell ${isToday ? 'today' : ''}">
+                            <div class="date-number">${day}</div>
+                            ${attendanceBadge}
+                        </div>
+                    `;
+                }
+
+                // Next month days
+                const totalCells = Math.ceil((startDayOfWeek + daysInMonth) / 7) * 7;
+                const nextMonthDays = totalCells - (startDayOfWeek + daysInMonth);
+                
+                for (let day = 1; day <= nextMonthDays; day++) {
+                    calendarHTML += `
+                        <div class="calendar-cell other-month">
+                            <div class="date-number">${day}</div>
+                        </div>
+                    `;
+                }
+
+                calendarGrid.innerHTML = calendarHTML;
+            }
+
+            getAttendanceForDate(date) {
+                if (!this.currentWorker) return null;
+                
+                return this.attendanceData.find(record => 
+                    record.workerName === this.currentWorker && 
+                    record.date && 
+                    record.date.toDateString() === date.toDateString()
+                );
+            }
+
+            showError(message) {
+                document.getElementById('content').innerHTML = `
+                    <div class="error">
+                        <div style="font-size: 3rem; margin-bottom: 15px;">⚠️</div>
+                        <h3>Error</h3>
+                        <p>${message}</p>
+                        <button onclick="dashboard.init()" style="margin-top: 15px; padding: 10px 20px; background: #dc3545; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                            Retry
+                        </button>
+                    </div>
+                `;
+            }
         }
 
-        function changeMonth(workerName, direction) {
-            currentMonth += direction;
-            if (currentMonth > 11) {
-                currentMonth = 0;
-                currentYear++;
-            } else if (currentMonth < 0) {
-                currentMonth = 11;
-                currentYear--;
-            }
-            
-            const calendarId = `calendar-${workerName.replace(/\s+/g, '')}`;
-            const calendar = document.getElementById(calendarId);
-            const monthNav = calendar.previousElementSibling;
-            
-            calendar.innerHTML = generateCalendar(workerName, currentMonth, currentYear);
-            monthNav.querySelector('.current-month').textContent = `${monthNames[currentMonth]} ${currentYear}`;
-        }
-
-        // Load data when page loads
-        window.addEventListener('load', loadAttendanceData);
-
-        // Refresh data every 5 minutes
-        setInterval(loadAttendanceData, 5 * 60 * 1000);
+        // Initialize dashboard
+        let dashboard;
+        document.addEventListener('DOMContentLoaded', () => {
+            dashboard = new AttendanceDashboard();
+        });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'971063a7560c9e1b',t:'MTc1NTUwOTM5My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</body>
 </html>
