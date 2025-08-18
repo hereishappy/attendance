@@ -451,9 +451,49 @@
                 grid-template-columns: repeat(2, 1fr);
             }
             
+            .calendar-container {
+                padding: 15px;
+                overflow-x: auto;
+            }
+            
+            .calendar-grid {
+                min-width: 280px;
+                width: 100%;
+                margin: 0 auto;
+            }
+            
             .calendar-day {
+                font-size: 0.6rem;
+                min-height: 35px;
+                padding: 2px;
+            }
+            
+            .calendar-header {
                 font-size: 0.7rem;
-                min-height: 40px;
+                padding: 8px 2px;
+            }
+            
+            .ot-indicator {
+                font-size: 0.5rem;
+                margin-top: 1px;
+            }
+            
+            .month-nav {
+                flex-wrap: wrap;
+                gap: 10px;
+                justify-content: center;
+            }
+            
+            .month-nav button {
+                padding: 8px 12px;
+                font-size: 0.9rem;
+            }
+            
+            .current-month {
+                font-size: 1rem;
+                text-align: center;
+                width: 100%;
+                order: -1;
             }
 
             .form-row {
@@ -463,6 +503,10 @@
 
             .report-card {
                 padding: 20px;
+            }
+            
+            .main-container {
+                padding: 20px 10px;
             }
         }
     </style>
@@ -883,22 +927,22 @@
             };
 
             // Create WhatsApp message
-            let message = `🔔 *ATTENDANCE REPORT REQUEST*\n\n`;
-            message += `👤 *Worker Name:* ${formData.workerName}\n`;
-            message += `📅 *Date:* ${formData.date}\n`;
-            message += `📋 *Issue Type:* ${reportTypeText[formData.reportType]}\n`;
-            message += `👨‍💼 *Supervisor:* ${formData.supervisorName}\n`;
-            message += `⏰ *Work Hours:* ${formData.workHours}\n`;
+            let message = `*ATTENDANCE REPORT REQUEST*\n\n`;
+            message += `Worker Name: ${formData.workerName}\n`;
+            message += `Date: ${formData.date}\n`;
+            message += `Issue Type: ${reportTypeText[formData.reportType]}\n`;
+            message += `Supervisor: ${formData.supervisorName}\n`;
+            message += `Work Hours: ${formData.workHours}\n`;
             
             if (formData.otHours > 0) {
-                message += `⏱️ *OT Hours:* ${formData.otHours}\n`;
+                message += `OT Hours: ${formData.otHours}\n`;
             }
             
             if (formData.comments) {
-                message += `💬 *Comments:* ${formData.comments}\n`;
+                message += `Comments: ${formData.comments}\n`;
             }
             
-            message += `\n📝 *Submitted:* ${formData.submittedAt}`;
+            message += `\nSubmitted: ${formData.submittedAt}`;
 
             // Encode message for WhatsApp URL
             const encodedMessage = encodeURIComponent(message);
@@ -911,5 +955,5 @@
             document.querySelector('.report-form').reset();
         }
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97110c568002257c',t:'MTc1NTUxNjMwMi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9711161927e66ef8',t:'MTc1NTUxNjcwMi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
