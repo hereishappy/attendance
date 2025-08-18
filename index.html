@@ -3,793 +3,477 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Corporate Dashboard</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>Worker Attendance Dashboard</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; }
-        .card-shadow { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); }
-        .card-hover:hover { transform: translateY(-2px); transition: transform 0.2s ease-in-out; }
-        .loading { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .loading {
+            text-align: center;
+            color: white;
+            font-size: 1.2rem;
+            margin: 50px 0;
+        }
+
+        .error {
+            background: #ff4757;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .worker-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .worker-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+
+        .worker-header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f1f2f6;
+        }
+
+        .worker-name {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #2f3542;
+            margin-bottom: 5px;
+        }
+
+        .worker-stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 15px;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #5f27cd;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: #747d8c;
+            text-transform: uppercase;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 3px;
+            margin-top: 15px;
+        }
+
+        .calendar-header {
+            text-align: center;
+            font-weight: bold;
+            color: #2f3542;
+            padding: 8px 4px;
+            font-size: 0.8rem;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .calendar-day:hover {
+            transform: scale(1.1);
+        }
+
+        .calendar-day.empty {
+            color: #ddd;
+        }
+
+        .calendar-day.present {
+            background: #2ed573;
+            color: white;
+        }
+
+        .calendar-day.absent {
+            background: #ff4757;
+            color: white;
+        }
+
+        .calendar-day.partial {
+            background: #ffa502;
+            color: white;
+        }
+
+        .ot-indicator {
+            font-size: 0.6rem;
+            margin-top: 1px;
+        }
+
+        .month-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .month-nav button {
+            background: #5f27cd;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
+        .month-nav button:hover {
+            background: #341f97;
+        }
+
+        .current-month {
+            font-weight: bold;
+            color: #2f3542;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .worker-card {
+                padding: 15px;
+            }
+            
+            .calendar-day {
+                font-size: 0.6rem;
+            }
+        }
     </style>
 </head>
-<body class="bg-gray-50 min-h-screen">
-    <!-- Header -->
-    <header class="bg-white shadow-sm border-b border-gray-200">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center py-6">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
-                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-                            </svg>
-                        </div>
-                    </div>
-                    <div class="ml-4">
-                        <h1 class="text-2xl font-bold text-gray-900">Corporate Dashboard</h1>
-                        <p class="text-sm text-gray-500">Real-time business analytics</p>
-                    </div>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <div id="live-status" class="flex items-center px-3 py-1 rounded-full bg-green-100 text-green-800 text-sm">
-                        <div class="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></div>
-                        Live Data
-                    </div>
-                    <button onclick="refreshData()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
-                        <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                        </svg>
-                        Refresh Now
-                    </button>
-                </div>
-            </div>
-        </div>
-    </header>
+<body>
+    <div class="header">
+        <h1>📊 Worker Attendance Dashboard</h1>
+        <p>Live attendance tracking with calendar view</p>
+    </div>
 
-    <!-- Main Content -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <!-- Navigation Tabs -->
-        <div class="mb-8">
-            <nav class="flex space-x-8">
-                <button onclick="showTab('overview')" class="tab-btn active px-3 py-2 text-sm font-medium text-blue-600 border-b-2 border-blue-600">Overview</button>
-                <button onclick="showTab('attendance')" class="tab-btn px-3 py-2 text-sm font-medium text-gray-500 hover:text-gray-700">Attendance</button>
-                <button onclick="showTab('productivity')" class="tab-btn px-3 py-2 text-sm font-medium text-gray-500 hover:text-gray-700">Productivity</button>
-                <button onclick="showTab('performance')" class="tab-btn px-3 py-2 text-sm font-medium text-gray-500 hover:text-gray-700">Performance</button>
-                <button onclick="showTab('measurements')" class="tab-btn px-3 py-2 text-sm font-medium text-gray-500 hover:text-gray-700">Measurements</button>
-            </nav>
-        </div>
+    <div id="loading" class="loading">
+        Loading attendance data...
+    </div>
 
-        <!-- Overview Tab -->
-        <div id="overview-tab" class="tab-content">
-            <!-- KPI Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                <div class="bg-white rounded-xl card-shadow card-hover p-6">
-                    <div class="flex items-center">
-                        <div class="flex-shrink-0">
-                            <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
-                                <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                                </svg>
-                            </div>
-                        </div>
-                        <div class="ml-5 w-0 flex-1">
-                            <dl>
-                                <dt class="text-sm font-medium text-gray-500 truncate">Total Workers</dt>
-                                <dd class="text-lg font-medium text-gray-900" id="total-workers">Loading...</dd>
-                            </dl>
-                        </div>
-                    </div>
-                </div>
+    <div id="error" class="error" style="display: none;">
+        Unable to load data. Please check your CSV link and try again.
+    </div>
 
-                <div class="bg-white rounded-xl card-shadow card-hover p-6">
-                    <div class="flex items-center">
-                        <div class="flex-shrink-0">
-                            <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                                <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                            </div>
-                        </div>
-                        <div class="ml-5 w-0 flex-1">
-                            <dl>
-                                <dt class="text-sm font-medium text-gray-500 truncate">Avg Attendance</dt>
-                                <dd class="text-lg font-medium text-gray-900" id="avg-attendance">Loading...</dd>
-                            </dl>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-xl card-shadow card-hover p-6">
-                    <div class="flex items-center">
-                        <div class="flex-shrink-0">
-                            <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-                                <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
-                                </svg>
-                            </div>
-                        </div>
-                        <div class="ml-5 w-0 flex-1">
-                            <dl>
-                                <dt class="text-sm font-medium text-gray-500 truncate">Productivity</dt>
-                                <dd class="text-lg font-medium text-gray-900" id="avg-productivity">Loading...</dd>
-                            </dl>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-xl card-shadow card-hover p-6">
-                    <div class="flex items-center">
-                        <div class="flex-shrink-0">
-                            <div class="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
-                                <svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                            </div>
-                        </div>
-                        <div class="ml-5 w-0 flex-1">
-                            <dl>
-                                <dt class="text-sm font-medium text-gray-500 truncate">Overtime Hours</dt>
-                                <dd class="text-lg font-medium text-gray-900" id="total-overtime">Loading...</dd>
-                            </dl>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Performance Cards -->
-            <div class="bg-white rounded-xl card-shadow p-6">
-                <h3 class="text-lg font-medium text-gray-900 mb-4">Live Productivity Performance</h3>
-                <div id="productivity-performance-cards" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-h-96 overflow-y-auto">
-                    <!-- Productivity performance cards will be populated here -->
-                </div>
-            </div>
-        </div>
-
-        <!-- Attendance Tab -->
-        <div id="attendance-tab" class="tab-content hidden">
-            <div class="mb-6">
-                <h2 class="text-xl font-semibold text-gray-900 mb-4">Worker Attendance Cards</h2>
-                <div id="attendance-cards" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <!-- Attendance cards will be populated here -->
-                </div>
-            </div>
-        </div>
-
-        <!-- Productivity Tab -->
-        <div id="productivity-tab" class="tab-content hidden">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div class="bg-white rounded-xl card-shadow p-6">
-                    <h3 class="text-lg font-medium text-gray-900 mb-4">Daily Productivity</h3>
-                    <div id="productivity-list" class="space-y-3">
-                        <!-- Productivity data will be populated here -->
-                    </div>
-                </div>
-                <div class="bg-white rounded-xl card-shadow p-6">
-                    <h3 class="text-lg font-medium text-gray-900 mb-4">Productivity Trends</h3>
-                    <canvas id="productivityTrendChart" width="400" height="300"></canvas>
-                </div>
-            </div>
-        </div>
-
-        <!-- Performance Tab -->
-        <div id="performance-tab" class="tab-content hidden">
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="supervisor-cards">
-                <!-- Supervisor performance cards will be populated here -->
-            </div>
-        </div>
-
-        <!-- Measurements Tab -->
-        <div id="measurements-tab" class="tab-content hidden">
-            <div class="bg-white rounded-xl card-shadow p-6">
-                <h3 class="text-lg font-medium text-gray-900 mb-4">Measurement Entries</h3>
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200" id="measurements-table">
-                        <thead class="bg-gray-50">
-                            <tr id="measurements-header">
-                                <!-- Headers will be populated dynamically -->
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y divide-gray-200" id="measurements-body">
-                            <!-- Data will be populated here -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </main>
+    <div id="dashboard" class="dashboard" style="display: none;">
+    </div>
 
     <script>
-        // Data storage
-        let dashboardData = {
-            measurements: [],
-            attendance: [],
-            productivity: [],
-            supervisors: [],
-            finalAttendance: []
-        };
+        // Your live Google Sheets CSV URL
+        const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTRmYg3zmYTdR76pDZirRk3Q-jGChOHtKwW5sRhi9NmaOWjCCvMeGi_CzmtbEVRrVt_u4mgTQmyrjYB/pub?gid=1025965600&single=true&output=csv';
+        
+        let attendanceData = [];
+        let currentMonth = new Date().getMonth();
+        let currentYear = new Date().getFullYear();
 
-        // Sheet URLs
-        const sheetUrls = {
-            measurements: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTRmYg3zmYTdR76pDZirRk3Q-jGChOHtKwW5sRhi9NmaOWjCCvMeGi_CzmtbEVRrVt_u4mgTQmyrjYB/pub?gid=675931107&single=true&output=csv',
-            attendance: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTRmYg3zmYTdR76pDZirRk3Q-jGChOHtKwW5sRhi9NmaOWjCCvMeGi_CzmtbEVRrVt_u4mgTQmyrjYB/pub?gid=1025965600&single=true&output=csv',
-            productivity: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTRmYg3zmYTdR76pDZirRk3Q-jGChOHtKwW5sRhi9NmaOWjCCvMeGi_CzmtbEVRrVt_u4mgTQmyrjYB/pub?gid=1615191290&single=true&output=csv',
-            supervisors: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTRmYg3zmYTdR76pDZirRk3Q-jGChOHtKwW5sRhi9NmaOWjCCvMeGi_CzmtbEVRrVt_u4mgTQmyrjYB/pub?gid=1486071949&single=true&output=csv',
-            finalAttendance: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTRmYg3zmYTdR76pDZirRk3Q-jGChOHtKwW5sRhi9NmaOWjCCvMeGi_CzmtbEVRrVt_u4mgTQmyrjYB/pub?gid=1554768658&single=true&output=csv'
-        };
+        // Month names
+        const monthNames = [
+            'January', 'February', 'March', 'April', 'May', 'June',
+            'July', 'August', 'September', 'October', 'November', 'December'
+        ];
 
-        // Parse CSV data with better handling
-        function parseCSV(csv) {
-            const lines = csv.trim().split('\n').filter(line => line.trim());
-            if (lines.length === 0) return { headers: [], data: [] };
-            
-            // Parse headers
-            const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+        // Day names
+        const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+        async function loadAttendanceData() {
+            try {
+                const response = await fetch(CSV_URL);
+                const csvText = await response.text();
+                attendanceData = parseCSV(csvText);
+                
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('dashboard').style.display = 'grid';
+                renderDashboard();
+            } catch (error) {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('error').style.display = 'block';
+                console.error('Error loading data:', error);
+            }
+        }
+
+        function parseCSV(csvText) {
+            const lines = csvText.trim().split('\n');
+            const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
             const data = [];
             
-            // Parse data rows
             for (let i = 1; i < lines.length; i++) {
-                const line = lines[i].trim();
-                if (!line) continue;
-                
-                const values = [];
-                let current = '';
-                let inQuotes = false;
-                
-                for (let j = 0; j < line.length; j++) {
-                    const char = line[j];
-                    if (char === '"') {
-                        inQuotes = !inQuotes;
-                    } else if (char === ',' && !inQuotes) {
-                        values.push(current.trim().replace(/^"|"$/g, ''));
-                        current = '';
-                    } else {
-                        current += char;
+                const values = lines[i].split(',').map(v => v.trim().replace(/"/g, ''));
+                if (values.length >= 6) {
+                    const record = {
+                        date: values[0],
+                        supervisorName: values[1],
+                        workerName: values[2],
+                        totalManhours: parseFloat(values[3]) || 0,
+                        otHours: parseFloat(values[4]) || 0,
+                        endShiftManhours: parseFloat(values[5]) || 0
+                    };
+                    
+                    // Convert date format if needed
+                    if (record.date && record.workerName) {
+                        data.push(record);
                     }
-                }
-                values.push(current.trim().replace(/^"|"$/g, ''));
-                
-                const row = {};
-                headers.forEach((header, index) => {
-                    row[header] = values[index] || '';
-                });
-                
-                // Only add rows with actual data
-                if (Object.values(row).some(val => val && val.trim())) {
-                    data.push(row);
                 }
             }
             
-            return { headers, data };
+            return data;
         }
 
-        // Fetch data from Google Sheets with multiple fallback methods for live data
-        async function fetchSheetData(url, sheetName) {
-            const proxies = [
-                null, // Direct fetch first
-                'https://api.allorigins.win/raw?url=',
-                'https://cors-anywhere.herokuapp.com/',
-                'https://api.codetabs.com/v1/proxy?quest='
+        function generateSampleData() {
+            const workers = [
+                'John Smith', 'Maria Garcia', 'David Johnson', 'Sarah Wilson', 'Michael Brown',
+                'Lisa Davis', 'Robert Miller', 'Jennifer Taylor', 'William Anderson', 'Jessica Thomas'
             ];
             
-            for (let i = 0; i < proxies.length; i++) {
-                try {
-                    const proxyUrl = proxies[i] ? proxies[i] + encodeURIComponent(url) : url;
-                    console.log(`Fetching ${sheetName} data (attempt ${i + 1}):`, proxyUrl);
-                    
-                    const response = await fetch(proxyUrl, {
-                        method: 'GET',
-                        mode: 'cors',
-                        headers: {
-                            'Accept': 'text/csv,text/plain,*/*',
-                            'Cache-Control': 'no-cache'
-                        }
-                    });
-                    
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    
-                    const csv = await response.text();
-                    console.log(`✅ ${sheetName} CSV received (${csv.length} chars):`, csv.substring(0, 100) + '...');
-                    
-                    if (!csv || csv.trim().length === 0) {
-                        throw new Error('Empty response');
-                    }
-                    
-                    const parsed = parseCSV(csv);
-                    console.log(`✅ ${sheetName} parsed successfully:`, parsed.data.length, 'rows');
-                    return parsed;
-                    
-                } catch (error) {
-                    console.log(`❌ ${sheetName} attempt ${i + 1} failed:`, error.message);
-                    if (i === proxies.length - 1) {
-                        console.error(`All attempts failed for ${sheetName}`);
-                        showDataError(sheetName, 'All connection methods failed');
-                        return { headers: [], data: [] };
-                    }
-                }
-            }
-        }
-
-        // Show data loading errors to user and update status
-        function showDataError(sheetName, errorMsg) {
-            const errorDiv = document.createElement('div');
-            errorDiv.className = 'fixed top-4 right-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded z-50';
-            errorDiv.innerHTML = `
-                <strong>❌ Connection Error:</strong> ${sheetName} data failed<br>
-                <small>${errorMsg}</small>
-                <button onclick="this.parentElement.remove()" class="ml-2 text-red-500 hover:text-red-700">×</button>
-            `;
-            document.body.appendChild(errorDiv);
-            setTimeout(() => errorDiv.remove(), 10000);
+            const supervisors = ['Tom Manager', 'Jane Supervisor', 'Bob Leader'];
+            const data = [];
             
-            // Update live status indicator to show error
-            const liveStatus = document.getElementById('live-status');
-            liveStatus.className = 'flex items-center px-3 py-1 rounded-full bg-red-100 text-red-800 text-sm';
-            liveStatus.innerHTML = `
-                <div class="w-2 h-2 bg-red-500 rounded-full mr-2"></div>
-                Connection Issues
-            `;
-        }
-
-        // Load all data with detailed logging and loading indicators
-        async function loadAllData() {
-            console.log('Starting data load...');
-            
-            // Show loading indicators
-            document.getElementById('total-workers').innerHTML = '<div class="loading">Loading...</div>';
-            document.getElementById('avg-attendance').innerHTML = '<div class="loading">Loading...</div>';
-            document.getElementById('avg-productivity').innerHTML = '<div class="loading">Loading...</div>';
-            document.getElementById('total-overtime').innerHTML = '<div class="loading">Loading...</div>';
-            
-            try {
-                console.log('Fetching all sheets simultaneously...');
-                const startTime = Date.now();
+            // Generate data for the last 30 days
+            for (let i = 0; i < 30; i++) {
+                const date = new Date();
+                date.setDate(date.getDate() - i);
                 
-                const [measurements, attendance, productivity, supervisors, finalAttendance] = await Promise.all([
-                    fetchSheetData(sheetUrls.measurements, 'Measurements'),
-                    fetchSheetData(sheetUrls.attendance, 'Attendance'),
-                    fetchSheetData(sheetUrls.productivity, 'Productivity'),
-                    fetchSheetData(sheetUrls.supervisors, 'Supervisors'),
-                    fetchSheetData(sheetUrls.finalAttendance, 'Final Attendance')
-                ]);
-
-                const loadTime = Date.now() - startTime;
-                console.log(`All data loaded in ${loadTime}ms`);
-
-                dashboardData = {
-                    measurements: measurements.data || [],
-                    attendance: attendance.data || [],
-                    productivity: productivity.data || [],
-                    supervisors: supervisors.data || [],
-                    finalAttendance: finalAttendance.data || [],
-                    headers: {
-                        measurements: measurements.headers || [],
-                        attendance: attendance.headers || [],
-                        productivity: productivity.headers || [],
-                        supervisors: supervisors.headers || [],
-                        finalAttendance: finalAttendance.headers || []
+                workers.forEach(worker => {
+                    // 85% chance of attendance
+                    if (Math.random() > 0.15) {
+                        const totalHours = 8 + Math.floor(Math.random() * 5); // 8-12 hours
+                        const otHours = Math.max(0, totalHours - 8);
+                        
+                        data.push({
+                            date: date.toISOString().split('T')[0],
+                            supervisorName: supervisors[Math.floor(Math.random() * supervisors.length)],
+                            workerName: worker,
+                            totalManhours: totalHours,
+                            otHours: otHours,
+                            endShiftManhours: totalHours
+                        });
                     }
-                };
-
-                console.log('Dashboard data loaded:', {
-                    measurements: dashboardData.measurements.length,
-                    attendance: dashboardData.attendance.length,
-                    productivity: dashboardData.productivity.length,
-                    supervisors: dashboardData.supervisors.length,
-                    finalAttendance: dashboardData.finalAttendance.length
-                });
-
-                // Show success message
-                showSuccessMessage(`Data loaded successfully! ${loadTime}ms`);
-                
-                updateDashboard();
-            } catch (error) {
-                console.error('Error loading data:', error);
-                // Show error message to user
-                document.getElementById('total-workers').textContent = 'Error';
-                document.getElementById('avg-attendance').textContent = 'Error';
-                document.getElementById('avg-productivity').textContent = 'Error';
-                document.getElementById('total-overtime').textContent = 'Error';
-                
-                showDataError('All Data', error.message);
-            }
-        }
-
-        // Show success message and update live status
-        function showSuccessMessage(message) {
-            const successDiv = document.createElement('div');
-            successDiv.className = 'fixed top-4 right-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded z-50';
-            successDiv.innerHTML = `
-                <strong>✅ Live Data Updated:</strong> ${message}
-                <button onclick="this.parentElement.remove()" class="ml-2 text-green-500 hover:text-green-700">×</button>
-            `;
-            document.body.appendChild(successDiv);
-            setTimeout(() => successDiv.remove(), 5000);
-            
-            // Update live status indicator
-            const liveStatus = document.getElementById('live-status');
-            liveStatus.className = 'flex items-center px-3 py-1 rounded-full bg-green-100 text-green-800 text-sm';
-            liveStatus.innerHTML = `
-                <div class="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></div>
-                Live Data Connected
-            `;
-        }
-
-        // Update dashboard with data
-        function updateDashboard() {
-            console.log('Updating dashboard with live data...');
-            updateKPIs();
-            updateAttendanceCards();
-            updateProductivityData();
-            updateProductivityPerformanceCards();
-            updateSupervisorCards();
-            updateMeasurementsTable();
-            console.log('Dashboard updated successfully with live data');
-        }
-
-        // Update KPI cards with better data handling
-        function updateKPIs() {
-            console.log('Updating KPIs...');
-            
-            // Get all unique workers from all data sources
-            const allWorkers = new Set();
-            
-            // Check all possible worker name fields
-            [...dashboardData.attendance, ...dashboardData.finalAttendance, ...dashboardData.measurements].forEach(row => {
-                const workerName = row.Worker || row.Name || row.Employee || row.worker || row.name || row.employee || '';
-                if (workerName && workerName.trim()) {
-                    allWorkers.add(workerName.trim());
-                }
-            });
-            
-            const totalWorkers = allWorkers.size;
-            
-            // Calculate attendance from final attendance data
-            let avgAttendance = 0;
-            if (dashboardData.finalAttendance.length > 0) {
-                const presentCount = dashboardData.finalAttendance.filter(row => {
-                    const hours = parseFloat(row.Hours || row.hours || 0);
-                    return hours >= 8;
-                }).length;
-                avgAttendance = Math.round((presentCount / dashboardData.finalAttendance.length) * 100);
-            }
-            
-            // Calculate productivity
-            let avgProductivity = 0;
-            if (dashboardData.productivity.length > 0) {
-                const totalProductivity = dashboardData.productivity.reduce((sum, row) => {
-                    const prod = parseFloat(row.Productivity || row.productivity || 0);
-                    return sum + prod;
-                }, 0);
-                avgProductivity = Math.round(totalProductivity / dashboardData.productivity.length);
-            }
-            
-            // Calculate overtime
-            const totalOvertime = dashboardData.finalAttendance.reduce((sum, row) => {
-                const hours = parseFloat(row.Hours || row.hours || 0);
-                return sum + (hours > 8 ? hours - 8 : 0);
-            }, 0);
-
-            // Update UI
-            document.getElementById('total-workers').textContent = totalWorkers || '0';
-            document.getElementById('avg-attendance').textContent = avgAttendance + '%';
-            document.getElementById('avg-productivity').textContent = avgProductivity + '%';
-            document.getElementById('total-overtime').textContent = Math.round(totalOvertime) + 'h';
-            
-            console.log('KPIs updated:', { totalWorkers, avgAttendance, avgProductivity, totalOvertime });
-        }
-
-        // Update attendance cards with better data handling
-        function updateAttendanceCards() {
-            console.log('Updating attendance cards...');
-            const container = document.getElementById('attendance-cards');
-            container.innerHTML = '';
-
-            if (dashboardData.finalAttendance.length === 0) {
-                container.innerHTML = '<div class="col-span-full text-center text-gray-500 py-8">No attendance data available</div>';
-                return;
-            }
-
-            // Group attendance by worker
-            const workerAttendance = {};
-            dashboardData.finalAttendance.forEach(row => {
-                const worker = row.Worker || row.Name || row.Employee || row.worker || row.name || row.employee || 'Unknown Worker';
-                if (!workerAttendance[worker]) {
-                    workerAttendance[worker] = [];
-                }
-                workerAttendance[worker].push(row);
-            });
-
-            Object.entries(workerAttendance).forEach(([worker, records]) => {
-                const totalHours = records.reduce((sum, record) => sum + parseFloat(record.Hours || record.hours || 0), 0);
-                const regularHours = records.reduce((sum, record) => {
-                    const hours = parseFloat(record.Hours || record.hours || 0);
-                    return sum + (hours > 8 ? 8 : hours);
-                }, 0);
-                const overtimeHours = totalHours - regularHours;
-                const daysPresent = records.filter(record => parseFloat(record.Hours || record.hours || 0) >= 8).length;
-
-                const card = document.createElement('div');
-                card.className = 'bg-white rounded-xl card-shadow card-hover p-6';
-                card.innerHTML = `
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-lg font-medium text-gray-900">${worker}</h3>
-                        <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                            </svg>
-                        </div>
-                    </div>
-                    <div class="space-y-3">
-                        <div class="flex justify-between">
-                            <span class="text-sm text-gray-500">Days Present</span>
-                            <span class="text-sm font-medium text-gray-900">${daysPresent}</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-sm text-gray-500">Regular Hours</span>
-                            <span class="text-sm font-medium text-gray-900">${regularHours.toFixed(1)}h</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-sm text-gray-500">Overtime Hours</span>
-                            <span class="text-sm font-medium text-orange-600">${overtimeHours.toFixed(1)}h</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-sm text-gray-500">Total Hours</span>
-                            <span class="text-sm font-semibold text-gray-900">${totalHours.toFixed(1)}h</span>
-                        </div>
-                    </div>
-                    <div class="mt-4 pt-4 border-t border-gray-200">
-                        <div class="flex items-center">
-                            <div class="flex-1 bg-gray-200 rounded-full h-2">
-                                <div class="bg-blue-600 h-2 rounded-full" style="width: ${Math.min((daysPresent / 30) * 100, 100)}%"></div>
-                            </div>
-                            <span class="ml-2 text-xs text-gray-500">${Math.round((daysPresent / 30) * 100)}%</span>
-                        </div>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
-        }
-
-        // Update productivity data with better handling
-        function updateProductivityData() {
-            console.log('Updating productivity data...');
-            const container = document.getElementById('productivity-list');
-            container.innerHTML = '';
-
-            if (dashboardData.productivity.length === 0) {
-                container.innerHTML = '<div class="text-center text-gray-500 py-4">No productivity data available</div>';
-                return;
-            }
-
-            dashboardData.productivity.slice(0, 10).forEach(row => {
-                const date = row.Date || row.date || 'N/A';
-                const productivity = parseFloat(row.Productivity || row.productivity || 0);
-                const target = parseFloat(row.Target || row.target || 100);
-                const percentage = target > 0 ? Math.round((productivity / target) * 100) : 0;
-
-                const item = document.createElement('div');
-                item.className = 'flex items-center justify-between p-3 bg-gray-50 rounded-lg';
-                item.innerHTML = `
-                    <div>
-                        <p class="text-sm font-medium text-gray-900">${date}</p>
-                        <p class="text-xs text-gray-500">Target: ${target}</p>
-                    </div>
-                    <div class="text-right">
-                        <p class="text-sm font-medium text-gray-900">${productivity}</p>
-                        <p class="text-xs ${percentage >= 100 ? 'text-green-600' : 'text-red-600'}">${percentage}%</p>
-                    </div>
-                `;
-                container.appendChild(item);
-            });
-        }
-
-        // Update productivity performance cards
-        function updateProductivityPerformanceCards() {
-            const container = document.getElementById('productivity-performance-cards');
-            container.innerHTML = '';
-
-            dashboardData.productivity.slice(0, 8).forEach(row => {
-                const date = row.Date || 'N/A';
-                const productivity = parseFloat(row.Productivity || 0);
-                const target = parseFloat(row.Target || 100);
-                const percentage = target > 0 ? Math.round((productivity / target) * 100) : 0;
-                const status = percentage >= 100 ? 'Excellent' : percentage >= 80 ? 'Good' : percentage >= 60 ? 'Average' : 'Below Target';
-                const statusColor = percentage >= 100 ? 'text-green-600 bg-green-100' : percentage >= 80 ? 'text-blue-600 bg-blue-100' : percentage >= 60 ? 'text-yellow-600 bg-yellow-100' : 'text-red-600 bg-red-100';
-
-                const card = document.createElement('div');
-                card.className = 'bg-gray-50 rounded-lg p-4 border border-gray-200 hover:shadow-md transition-shadow';
-                card.innerHTML = `
-                    <div class="flex items-center justify-between mb-3">
-                        <h4 class="text-sm font-medium text-gray-900">${date}</h4>
-                        <span class="px-2 py-1 text-xs font-medium rounded-full ${statusColor}">${status}</span>
-                    </div>
-                    <div class="space-y-2">
-                        <div class="flex justify-between text-sm">
-                            <span class="text-gray-500">Achieved</span>
-                            <span class="font-medium text-gray-900">${productivity}</span>
-                        </div>
-                        <div class="flex justify-between text-sm">
-                            <span class="text-gray-500">Target</span>
-                            <span class="font-medium text-gray-900">${target}</span>
-                        </div>
-                        <div class="flex justify-between text-sm">
-                            <span class="text-gray-500">Performance</span>
-                            <span class="font-semibold ${percentage >= 100 ? 'text-green-600' : percentage >= 80 ? 'text-blue-600' : percentage >= 60 ? 'text-yellow-600' : 'text-red-600'}">${percentage}%</span>
-                        </div>
-                    </div>
-                    <div class="mt-3">
-                        <div class="flex items-center">
-                            <div class="flex-1 bg-gray-200 rounded-full h-2">
-                                <div class="h-2 rounded-full ${percentage >= 100 ? 'bg-green-500' : percentage >= 80 ? 'bg-blue-500' : percentage >= 60 ? 'bg-yellow-500' : 'bg-red-500'}" style="width: ${Math.min(percentage, 100)}%"></div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
-        }
-
-        // Update supervisor cards with better data handling
-        function updateSupervisorCards() {
-            console.log('Updating supervisor cards...');
-            const container = document.getElementById('supervisor-cards');
-            container.innerHTML = '';
-
-            if (dashboardData.supervisors.length === 0) {
-                container.innerHTML = '<div class="col-span-full text-center text-gray-500 py-8">No supervisor data available</div>';
-                return;
-            }
-
-            dashboardData.supervisors.forEach(row => {
-                const name = row.Supervisor || row.Name || row.supervisor || row.name || 'Unknown Supervisor';
-                const performance = parseFloat(row.Performance || row.performance || 0);
-                const rating = parseFloat(row.Rating || row.rating || 0);
-                const team = row.Team || row.team || 'N/A';
-
-                const card = document.createElement('div');
-                card.className = 'bg-white rounded-xl card-shadow card-hover p-6';
-                card.innerHTML = `
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-lg font-medium text-gray-900">${name}</h3>
-                        <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                            <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path>
-                            </svg>
-                        </div>
-                    </div>
-                    <div class="space-y-3">
-                        <div class="flex justify-between">
-                            <span class="text-sm text-gray-500">Team</span>
-                            <span class="text-sm font-medium text-gray-900">${team}</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-sm text-gray-500">Performance</span>
-                            <span class="text-sm font-medium text-gray-900">${performance}%</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-sm text-gray-500">Rating</span>
-                            <div class="flex items-center">
-                                ${Array.from({length: 5}, (_, i) => 
-                                    `<svg class="w-4 h-4 ${i < rating ? 'text-yellow-400' : 'text-gray-300'}" fill="currentColor" viewBox="0 0 20 20">
-                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                                    </svg>`
-                                ).join('')}
-                            </div>
-                        </div>
-                    </div>
-                    <div class="mt-4 pt-4 border-t border-gray-200">
-                        <div class="flex items-center">
-                            <div class="flex-1 bg-gray-200 rounded-full h-2">
-                                <div class="bg-green-600 h-2 rounded-full" style="width: ${Math.min(performance, 100)}%"></div>
-                            </div>
-                            <span class="ml-2 text-xs text-gray-500">${performance}%</span>
-                        </div>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
-        }
-
-        // Update measurements table
-        function updateMeasurementsTable() {
-            const headerRow = document.getElementById('measurements-header');
-            const tbody = document.getElementById('measurements-body');
-            
-            headerRow.innerHTML = '';
-            tbody.innerHTML = '';
-
-            if (dashboardData.headers.measurements && dashboardData.headers.measurements.length > 0) {
-                dashboardData.headers.measurements.forEach(header => {
-                    const th = document.createElement('th');
-                    th.className = 'px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider';
-                    th.textContent = header;
-                    headerRow.appendChild(th);
-                });
-
-                dashboardData.measurements.slice(0, 20).forEach(row => {
-                    const tr = document.createElement('tr');
-                    tr.className = 'hover:bg-gray-50';
-                    
-                    dashboardData.headers.measurements.forEach(header => {
-                        const td = document.createElement('td');
-                        td.className = 'px-6 py-4 whitespace-nowrap text-sm text-gray-900';
-                        td.textContent = row[header] || '';
-                        tr.appendChild(td);
-                    });
-                    
-                    tbody.appendChild(tr);
                 });
             }
+            
+            return data;
         }
 
-        // Update charts (removed productivity overview chart)
-        function updateCharts() {
-            // Charts removed - focusing on live data cards instead
-            console.log('Chart updates skipped - using live data cards');
+        function renderDashboard() {
+            const dashboard = document.getElementById('dashboard');
+            const workers = [...new Set(attendanceData.map(record => record.workerName))];
+            
+            dashboard.innerHTML = '';
+            
+            workers.forEach(worker => {
+                const workerCard = createWorkerCard(worker);
+                dashboard.appendChild(workerCard);
+            });
         }
 
-        // Tab functionality
-        function showTab(tabName) {
-            // Hide all tabs
-            document.querySelectorAll('.tab-content').forEach(tab => {
-                tab.classList.add('hidden');
+        function createWorkerCard(workerName) {
+            const workerData = attendanceData.filter(record => record.workerName === workerName);
+            
+            // Calculate stats
+            const totalDays = workerData.length;
+            const totalOT = workerData.reduce((sum, record) => sum + (record.otHours || 0), 0);
+            const avgHours = totalDays > 0 ? (workerData.reduce((sum, record) => sum + record.totalManhours, 0) / totalDays).toFixed(1) : 0;
+            
+            const card = document.createElement('div');
+            card.className = 'worker-card';
+            
+            card.innerHTML = `
+                <div class="worker-header">
+                    <div class="worker-name">${workerName}</div>
+                </div>
+                
+                <div class="worker-stats">
+                    <div class="stat">
+                        <div class="stat-number">${totalDays}</div>
+                        <div class="stat-label">Days</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number">${totalOT}</div>
+                        <div class="stat-label">OT Hours</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number">${avgHours}</div>
+                        <div class="stat-label">Avg Hours</div>
+                    </div>
+                </div>
+                
+                <div class="month-nav">
+                    <button onclick="changeMonth('${workerName}', -1)">‹</button>
+                    <div class="current-month">${monthNames[currentMonth]} ${currentYear}</div>
+                    <button onclick="changeMonth('${workerName}', 1)">›</button>
+                </div>
+                
+                <div class="calendar-grid" id="calendar-${workerName.replace(/\s+/g, '')}">
+                    ${generateCalendar(workerName, currentMonth, currentYear)}
+                </div>
+            `;
+            
+            return card;
+        }
+
+        function generateCalendar(workerName, month, year) {
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const startDate = new Date(firstDay);
+            startDate.setDate(startDate.getDate() - firstDay.getDay());
+            
+            let html = '';
+            
+            // Add day headers
+            dayNames.forEach(day => {
+                html += `<div class="calendar-header">${day}</div>`;
             });
             
-            // Remove active class from all buttons
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('active', 'text-blue-600', 'border-blue-600');
-                btn.classList.add('text-gray-500');
-            });
-            
-            // Show selected tab
-            document.getElementById(tabName + '-tab').classList.remove('hidden');
-            
-            // Add active class to selected button
-            event.target.classList.add('active', 'text-blue-600', 'border-blue-600');
-            event.target.classList.remove('text-gray-500');
-        }
-
-        // Refresh data
-        function refreshData() {
-            console.log('Manual refresh triggered');
-            loadAllData();
-        }
-
-        // Auto-refresh every 30 seconds
-        let autoRefreshInterval;
-        function startAutoRefresh() {
-            autoRefreshInterval = setInterval(() => {
-                console.log('Auto-refresh triggered');
-                loadAllData();
-            }, 30000); // 30 seconds
-        }
-
-        function stopAutoRefresh() {
-            if (autoRefreshInterval) {
-                clearInterval(autoRefreshInterval);
-            }
-        }
-
-        // Initialize dashboard
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM loaded, initializing dashboard...');
-            loadAllData();
-            startAutoRefresh();
-            
-            // Add visibility change listener to pause/resume auto-refresh
-            document.addEventListener('visibilitychange', function() {
-                if (document.hidden) {
-                    stopAutoRefresh();
+            // Generate calendar days
+            const currentDate = new Date(startDate);
+            for (let i = 0; i < 42; i++) { // 6 weeks
+                const dateStr = currentDate.toISOString().split('T')[0];
+                const isCurrentMonth = currentDate.getMonth() === month;
+                const dayNum = currentDate.getDate();
+                
+                let dayClass = 'calendar-day';
+                let content = dayNum;
+                let otIndicator = '';
+                
+                if (!isCurrentMonth) {
+                    dayClass += ' empty';
+                    content = '';
                 } else {
-                    startAutoRefresh();
-                    loadAllData(); // Refresh when tab becomes visible
+                    const attendance = attendanceData.find(record => {
+                        const recordDate = new Date(record.date);
+                        const currentCalendarDate = new Date(currentDate);
+                        return record.workerName === workerName && 
+                               recordDate.toDateString() === currentCalendarDate.toDateString();
+                    });
+                    
+                    if (attendance) {
+                        const hours = attendance.endShiftManhours;
+                        const otHours = attendance.otHours || 0;
+                        
+                        if (hours >= 8) {
+                            dayClass += ' present';
+                            // Show P + overtime hours (like P4 for 4 hours OT)
+                            if (otHours > 0) {
+                                otIndicator = `<div class="ot-indicator">P${otHours}</div>`;
+                            } else {
+                                otIndicator = `<div class="ot-indicator">P</div>`;
+                            }
+                        } else if (hours > 0) {
+                            dayClass += ' partial';
+                            otIndicator = `<div class="ot-indicator">${hours}h</div>`;
+                        }
+                    } else {
+                        // Check if it's a future date or weekend
+                        const today = new Date();
+                        today.setHours(0, 0, 0, 0);
+                        const checkDate = new Date(currentDate);
+                        checkDate.setHours(0, 0, 0, 0);
+                        
+                        if (checkDate <= today) {
+                            dayClass += ' absent';
+                        }
+                    }
                 }
-            });
-        });
+                
+                html += `<div class="${dayClass}">${content}${otIndicator}</div>`;
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
+            
+            return html;
+        }
+
+        function changeMonth(workerName, direction) {
+            currentMonth += direction;
+            if (currentMonth > 11) {
+                currentMonth = 0;
+                currentYear++;
+            } else if (currentMonth < 0) {
+                currentMonth = 11;
+                currentYear--;
+            }
+            
+            const calendarId = `calendar-${workerName.replace(/\s+/g, '')}`;
+            const calendar = document.getElementById(calendarId);
+            const monthNav = calendar.previousElementSibling;
+            
+            calendar.innerHTML = generateCalendar(workerName, currentMonth, currentYear);
+            monthNav.querySelector('.current-month').textContent = `${monthNames[currentMonth]} ${currentYear}`;
+        }
+
+        // Load data when page loads
+        window.addEventListener('load', loadAttendanceData);
+
+        // Refresh data every 5 minutes
+        setInterval(loadAttendanceData, 5 * 60 * 1000);
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96df79b4e7907e8a',t:'MTc1NDk5NjQ5My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'971063a7560c9e1b',t:'MTc1NTUwOTM5My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
