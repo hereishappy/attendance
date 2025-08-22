@@ -3,957 +3,414 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Corporate Attendance Portal</title>
+    <title>Employee Attendance Calendar</title>
+    <script src="https://unpkg.com/papaparse@5.4.1/papaparse.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-            min-height: 100vh;
-            color: #333;
-        }
-
-        .navbar {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            padding: 15px 0;
-            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
-        }
-
-        .nav-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 20px;
-        }
-
-        .logo {
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: #1e3c72;
-        }
-
-        .nav-info {
-            font-size: 0.9rem;
-            color: #666;
-        }
-
-        .main-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 40px 20px;
-        }
-
-        .search-section {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 40px;
-            margin-bottom: 30px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-            text-align: center;
-        }
-
-        .search-title {
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: #1e3c72;
-            margin-bottom: 10px;
-        }
-
-        .search-subtitle {
-            font-size: 1.1rem;
-            color: #666;
-            margin-bottom: 30px;
-        }
-
-        .search-form {
-            display: flex;
-            gap: 15px;
-            max-width: 500px;
-            margin: 0 auto;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        .search-input {
-            flex: 1;
-            min-width: 250px;
-            padding: 15px 20px;
-            border: 2px solid #e1e8ed;
-            border-radius: 50px;
-            font-size: 1rem;
-            outline: none;
-            transition: all 0.3s ease;
-        }
-
-        .search-input:focus {
-            border-color: #1e3c72;
-            box-shadow: 0 0 0 3px rgba(30, 60, 114, 0.1);
-        }
-
-        .search-btn {
-            padding: 15px 30px;
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-            color: white;
-            border: none;
-            border-radius: 50px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            min-width: 120px;
-        }
-
-        .search-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(30, 60, 114, 0.3);
-        }
-
-        .quote-section {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
-            padding: 25px;
-            margin-bottom: 30px;
-            text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .quote-text {
-            font-size: 1.2rem;
-            font-style: italic;
-            color: white;
-            margin-bottom: 10px;
-            line-height: 1.6;
-        }
-
-        .quote-author {
-            font-size: 0.9rem;
-            color: rgba(255, 255, 255, 0.8);
-        }
-
-        .loading {
-            text-align: center;
-            color: white;
-            font-size: 1.2rem;
-            margin: 50px 0;
-        }
-
-        .error {
-            background: #ff4757;
-            color: white;
-            padding: 20px;
-            border-radius: 15px;
-            margin: 20px 0;
-            text-align: center;
-        }
-
-        .worker-result {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-            margin-bottom: 30px;
-        }
-
-        .worker-header {
-            text-align: center;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 2px solid #f1f2f6;
-        }
-
-        .worker-name {
-            font-size: 2rem;
-            font-weight: 700;
-            color: #1e3c72;
-            margin-bottom: 10px;
-        }
-
-        .worker-welcome {
-            font-size: 1.1rem;
-            color: #666;
-        }
-
-        .worker-stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .stat-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 20px;
-            border-radius: 15px;
-            text-align: center;
-        }
-
-        .stat-number {
-            font-size: 2rem;
-            font-weight: 700;
-            margin-bottom: 5px;
-        }
-
-        .stat-label {
-            font-size: 0.9rem;
-            opacity: 0.9;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .calendar-container {
-            background: #f8f9fa;
-            border-radius: 15px;
-            padding: 25px;
-        }
-
         .calendar-grid {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
-            gap: 5px;
-            margin-top: 20px;
+            gap: 2px;
         }
-
-        .calendar-header {
-            text-align: center;
-            font-weight: 700;
-            color: #1e3c72;
-            padding: 15px 5px;
-            font-size: 0.9rem;
-        }
-
-        .calendar-day {
+        .day-cell {
             aspect-ratio: 1;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
-            border-radius: 10px;
-            font-size: 0.8rem;
-            font-weight: 600;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border-radius: 4px;
             cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
-            min-height: 50px;
+            transition: all 0.2s;
         }
-
-        .calendar-day:hover {
+        .day-cell:hover {
             transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
-
-        .calendar-day.empty {
-            color: #ccc;
-        }
-
-        .calendar-day.present {
-            background: linear-gradient(135deg, #2ed573 0%, #17c0eb 100%);
-            color: white;
-            box-shadow: 0 4px 15px rgba(46, 213, 115, 0.3);
-        }
-
-        .calendar-day.absent {
-            background: linear-gradient(135deg, #ff4757 0%, #ff3742 100%);
-            color: white;
-            box-shadow: 0 4px 15px rgba(255, 71, 87, 0.3);
-        }
-
-        .calendar-day.partial {
-            background: linear-gradient(135deg, #ffa502 0%, #ff6348 100%);
-            color: white;
-            box-shadow: 0 4px 15px rgba(255, 165, 2, 0.3);
-        }
-
-        .ot-indicator {
-            font-size: 0.7rem;
-            margin-top: 2px;
-            font-weight: 700;
-        }
-
-        .month-nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-
-        .month-nav button {
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            padding: 10px 15px;
-            cursor: pointer;
-            font-size: 1rem;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-
-        .month-nav button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(30, 60, 114, 0.3);
-        }
-
-        .current-month {
-            font-weight: 700;
-            color: #1e3c72;
-            font-size: 1.2rem;
-        }
-
-        .back-btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 50px;
-            padding: 12px 25px;
-            cursor: pointer;
-            font-size: 1rem;
-            font-weight: 600;
-            margin-bottom: 20px;
-            transition: all 0.3s ease;
-        }
-
-        .back-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
-        }
-
-        .report-section {
-            margin-top: 30px;
-        }
-
-        .report-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-        }
-
-        .report-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #1e3c72;
-            margin-bottom: 10px;
-            text-align: center;
-        }
-
-        .report-subtitle {
-            color: #666;
-            text-align: center;
-            margin-bottom: 25px;
-            font-size: 1rem;
-        }
-
-        .report-form {
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            font-weight: 600;
-            color: #1e3c72;
-            margin-bottom: 8px;
-            font-size: 0.9rem;
-        }
-
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e1e8ed;
-            border-radius: 10px;
-            font-size: 1rem;
-            outline: none;
-            transition: all 0.3s ease;
-            font-family: inherit;
-        }
-
-        .form-group input:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
-            border-color: #1e3c72;
-            box-shadow: 0 0 0 3px rgba(30, 60, 114, 0.1);
-        }
-
-        .form-group textarea {
-            resize: vertical;
-            min-height: 80px;
-        }
-
-        .report-submit-btn {
-            width: 100%;
-            padding: 15px;
-            background: linear-gradient(135deg, #2ed573 0%, #17c0eb 100%);
-            color: white;
-            border: none;
-            border-radius: 50px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-top: 10px;
-        }
-
-        .report-submit-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(46, 213, 115, 0.3);
-        }
-
-        .success-message {
-            background: linear-gradient(135deg, #2ed573 0%, #17c0eb 100%);
-            color: white;
-            padding: 15px;
-            border-radius: 10px;
-            text-align: center;
-            margin: 20px 0;
-            font-weight: 600;
-        }
-
-        @media (max-width: 768px) {
-            .search-form {
-                flex-direction: column;
-                align-items: center;
-            }
-            
-            .search-input {
-                min-width: 100%;
-            }
-            
-            .search-title {
-                font-size: 2rem;
-            }
-            
-            .worker-stats {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            
-            .calendar-container {
-                padding: 15px;
-                overflow-x: auto;
-            }
-            
-            .calendar-grid {
-                min-width: 280px;
-                width: 100%;
-                margin: 0 auto;
-            }
-            
-            .calendar-day {
-                font-size: 0.6rem;
-                min-height: 35px;
-                padding: 2px;
-            }
-            
-            .calendar-header {
-                font-size: 0.7rem;
-                padding: 8px 2px;
-            }
-            
-            .ot-indicator {
-                font-size: 0.5rem;
-                margin-top: 1px;
-            }
-            
-            .month-nav {
-                flex-wrap: wrap;
-                gap: 10px;
-                justify-content: center;
-            }
-            
-            .month-nav button {
-                padding: 8px 12px;
-                font-size: 0.9rem;
-            }
-            
-            .current-month {
-                font-size: 1rem;
-                text-align: center;
-                width: 100%;
-                order: -1;
-            }
-
-            .form-row {
-                grid-template-columns: 1fr;
-                gap: 0;
-            }
-
-            .report-card {
-                padding: 20px;
-            }
-            
-            .main-container {
-                padding: 20px 10px;
-            }
-        }
+        .present { background-color: #0ea5e9; color: white; }
+        .present-overtime { background-color: #10b981; color: white; }
+        .absent { background-color: #ef4444; color: white; }
+        .empty { background-color: #f3f4f6; color: #9ca3af; }
+        .header-day { background-color: #374151; color: white; font-weight: 600; }
     </style>
 </head>
-<body>
+<body class="bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-4xl">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">Employee Attendance Calendar</h1>
+            <p class="text-gray-600">Search for an employee to view their attendance record</p>
+        </div>
 
-
-    <div class="main-container">
-        <div id="searchView">
-            <div class="search-section">
-                <h1 class="search-title">वापसी पर स्वागत है!</h1>
-                <p class="search-subtitle">अपनी उपस्थिति रिकॉर्ड देखने के लिए अपना नाम दर्ज करें</p>
-                
-                <form class="search-form" onsubmit="searchWorker(event)">
+        <!-- Search Section -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <div class="flex flex-col sm:flex-row gap-4 items-center">
+                <div class="flex-1 w-full">
+                    <label for="employeeSearch" class="block text-sm font-medium text-gray-700 mb-2">
+                        Employee Name
+                    </label>
                     <input 
                         type="text" 
-                        id="workerNameInput" 
-                        class="search-input" 
-                        placeholder="Enter your full name..."
-                        required
+                        id="employeeSearch" 
+                        placeholder="Type employee name..."
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     >
-                    <button type="submit" class="search-btn">View Attendance</button>
-                </form>
-            </div>
-
-            <div class="quote-section">
-                <div class="quote-text" id="quoteText">
-                    "सफलता अंतिम नहीं है, असफलता घातक नहीं है: जारी रखने का साहस ही मायने रखता है।"
                 </div>
-                <div class="quote-author" id="quoteAuthor">- गुरविंदर सिंह</div>
+                <div class="flex gap-2">
+                    <button 
+                        id="refreshBtn" 
+                        class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    >
+                        Refresh Data
+                    </button>
+                    <select id="monthSelect" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                        <!-- Options will be populated by JavaScript -->
+                    </select>
+                </div>
             </div>
-        </div>
-
-        <div id="loading" class="loading" style="display: none;">
-            Loading your attendance data...
-        </div>
-
-        <div id="error" class="error" style="display: none;">
-            Worker not found. Please check the spelling and try again.
-        </div>
-
-        <div id="workerView" style="display: none;">
-            <button class="back-btn" onclick="showSearchView()">← Back to Search</button>
             
-            <div class="worker-result" id="workerResult">
-                <!-- Worker data will be populated here -->
-            </div>
+            <!-- Employee suggestions -->
+            <div id="suggestions" class="mt-2 bg-white border border-gray-200 rounded-lg shadow-lg hidden max-h-48 overflow-y-auto"></div>
+        </div>
 
-            <div class="report-section">
-                <div class="report-card">
-                    <h3 class="report-title">📝 Report Missing Attendance/OT</h3>
-                    <p class="report-subtitle">Found missing attendance or overtime? Submit a correction request below:</p>
-                    
-                    <form class="report-form" onsubmit="submitReport(event)">
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="reportDate">Date</label>
-                                <input type="date" id="reportDate" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="reportType">Report Type</label>
-                                <select id="reportType" required>
-                                    <option value="">Select Type</option>
-                                    <option value="missing_attendance">Missing Attendance</option>
-                                    <option value="missing_ot">Missing Overtime</option>
-                                    <option value="incorrect_hours">Incorrect Hours</option>
-                                </select>
-                            </div>
-                        </div>
-                        
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="supervisorName">Supervisor Name</label>
-                                <input type="text" id="supervisorName" placeholder="Enter supervisor name" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="workHours">Work Hours</label>
-                                <input type="number" id="workHours" placeholder="8" min="0" max="24" step="0.5" required>
-                            </div>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="otHours">Overtime Hours (if any)</label>
-                            <input type="number" id="otHours" placeholder="0" min="0" max="16" step="0.5">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="reportComments">Additional Comments</label>
-                            <textarea id="reportComments" placeholder="Provide any additional details about the missing attendance or overtime..."></textarea>
-                        </div>
-                        
-                        <button type="submit" class="report-submit-btn">Submit Report</button>
-                    </form>
+        <!-- Loading indicator -->
+        <div id="loading" class="text-center py-8 hidden">
+            <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <p class="mt-2 text-gray-600">Loading attendance data...</p>
+        </div>
+
+        <!-- Calendar Section -->
+        <div id="calendarSection" class="bg-white rounded-lg shadow-md p-6 hidden">
+            <div class="flex justify-between items-center mb-6">
+                <h2 id="employeeName" class="text-2xl font-bold text-gray-800"></h2>
+                <div id="monthYear" class="text-lg font-semibold text-gray-600"></div>
+            </div>
+            
+            <!-- Legend -->
+            <div class="flex flex-wrap gap-4 mb-6 text-sm">
+                <div class="flex items-center gap-2">
+                    <div class="w-4 h-4 bg-sky-500 rounded"></div>
+                    <span>Present</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div class="w-4 h-4 bg-green-500 rounded"></div>
+                    <span>Present + Overtime</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div class="w-4 h-4 bg-red-500 rounded"></div>
+                    <span>Absent</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div class="w-4 h-4 bg-gray-300 rounded"></div>
+                    <span>No Data</span>
                 </div>
             </div>
+
+            <!-- Calendar Grid -->
+            <div class="calendar-grid" id="calendar">
+                <!-- Calendar will be populated by JavaScript -->
+            </div>
+
+            <!-- Stats -->
+            <div id="stats" class="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
+                <!-- Stats will be populated by JavaScript -->
+            </div>
+        </div>
+
+        <!-- No results message -->
+        <div id="noResults" class="text-center py-8 hidden">
+            <p class="text-gray-600">No employee found. Please check the name and try again.</p>
         </div>
     </div>
 
     <script>
-        // Your live Google Sheets CSV URL
-        const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTRmYg3zmYTdR76pDZirRk3Q-jGChOHtKwW5sRhi9NmaOWjCCvMeGi_CzmtbEVRrVt_u4mgTQmyrjYB/pub?gid=1025965600&single=true&output=csv';
-        
-        let attendanceData = [];
-        let currentMonth = new Date().getMonth();
-        let currentYear = new Date().getFullYear();
-        let currentWorker = '';
-
-        // Month names
-        const monthNames = [
-            'January', 'February', 'March', 'April', 'May', 'June',
-            'July', 'August', 'September', 'October', 'November', 'December'
-        ];
-
-        // Day names
-        const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-
-        // Hindi Motivational Quotes
-        const motivationalQuotes = [
-            {
-                text: "उत्कृष्टता एक कौशल नहीं, एक दृष्टिकोण है। आपकी नियमित उपस्थिति उत्कृष्टता के प्रति आपकी प्रतिबद्धता दिखाती है।",
-                author: "गुरविंदर सिंह"
-            },
-            {
-                text: "हर दिन जब आप आते हैं, तो आप अपने लक्ष्यों के एक कदम और करीब होते हैं। आपकी उपस्थिति एक अंतर बनाती है।",
-                author: "गुरविंदर सिंह"
-            },
-            {
-                text: "विश्वसनीयता विश्वास की नींव है। आपका उपस्थिति रिकॉर्ड आपके चरित्र के बारे में बहुत कुछ कहता है।",
-                author: "गुरविंदर सिंह"
-            },
-            {
-                text: "सफलता निरंतरता की नींव पर बनी है। आते रहें, बढ़ते रहें।",
-                author: "गुरविंदर सिंह"
-            },
-            {
-                text: "उपस्थित रहने के लिए आपका समर्पण आपकी भविष्य की सफलता में एक निवेश है।",
-                author: "गुरविंदर सिंह"
-            },
-            {
-                text: "महान उपलब्धियां महान उपस्थिति से शुरू होती हैं। आप कुछ अद्भुत बना रहे हैं।",
-                author: "गुरविंदर सिंह"
-            },
-            {
-                text: "हर उपस्थित दिन आपकी व्यावसायिक विरासत का एक निर्माण खंड है।",
-                author: "गुरविंदर सिंह"
-            },
-            {
-                text: "उपस्थिति में निरंतरता चरित्र में निरंतरता को दर्शाती है। आप एक महान उदाहरण स्थापित कर रहे हैं।",
-                author: "गुरविंदर सिंह"
+        class AttendanceCalendar {
+            constructor() {
+                this.csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRxODcmDFDJLfScffQaei0ejYlolvQKi32KiWBBAp97WO7lLuD1TZHgK-ibCMn5kmW_0CsQHZMzcrHp/pub?gid=1727336003&single=true&output=csv';
+                this.attendanceData = [];
+                this.employees = [];
+                this.currentEmployee = null;
+                this.currentMonth = new Date().getMonth();
+                this.currentYear = new Date().getFullYear();
+                
+                this.initializeElements();
+                this.setupEventListeners();
+                this.loadData();
+                this.populateMonthSelect();
             }
-        ];
 
-        async function loadAttendanceData() {
-            try {
-                const response = await fetch(CSV_URL);
-                const csvText = await response.text();
-                attendanceData = parseCSV(csvText);
-                return true;
-            } catch (error) {
-                console.error('Error loading data:', error);
-                return false;
+            initializeElements() {
+                this.searchInput = document.getElementById('employeeSearch');
+                this.suggestionsDiv = document.getElementById('suggestions');
+                this.calendarSection = document.getElementById('calendarSection');
+                this.loading = document.getElementById('loading');
+                this.noResults = document.getElementById('noResults');
+                this.calendar = document.getElementById('calendar');
+                this.employeeName = document.getElementById('employeeName');
+                this.monthYear = document.getElementById('monthYear');
+                this.stats = document.getElementById('stats');
+                this.refreshBtn = document.getElementById('refreshBtn');
+                this.monthSelect = document.getElementById('monthSelect');
             }
-        }
 
-        function parseCSV(csvText) {
-            const lines = csvText.trim().split('\n');
-            const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
-            const data = [];
-            
-            for (let i = 1; i < lines.length; i++) {
-                const values = lines[i].split(',').map(v => v.trim().replace(/"/g, ''));
-                if (values.length >= 6) {
-                    const record = {
-                        date: values[0],
-                        supervisorName: values[1],
-                        workerName: values[2],
-                        totalManhours: parseFloat(values[3]) || 0,
-                        otHours: parseFloat(values[4]) || 0,
-                        endShiftManhours: parseFloat(values[5]) || 0
-                    };
-                    
-                    if (record.date && record.workerName) {
-                        data.push(record);
+            setupEventListeners() {
+                this.searchInput.addEventListener('input', (e) => this.handleSearch(e.target.value));
+                this.searchInput.addEventListener('focus', () => this.showSuggestions());
+                document.addEventListener('click', (e) => {
+                    if (!e.target.closest('#employeeSearch') && !e.target.closest('#suggestions')) {
+                        this.hideSuggestions();
                     }
+                });
+                this.refreshBtn.addEventListener('click', () => this.loadData());
+                this.monthSelect.addEventListener('change', (e) => this.changeMonth(e.target.value));
+            }
+
+            async loadData() {
+                this.showLoading();
+                try {
+                    const response = await fetch(this.csvUrl);
+                    const csvText = await response.text();
+                    
+                    Papa.parse(csvText, {
+                        header: true,
+                        complete: (results) => {
+                            this.attendanceData = results.data.filter(row => row.Name && row.Date);
+                            this.employees = [...new Set(this.attendanceData.map(row => row.Name))].sort();
+                            this.hideLoading();
+                        },
+                        error: (error) => {
+                            console.error('Error parsing CSV:', error);
+                            this.hideLoading();
+                        }
+                    });
+                } catch (error) {
+                    console.error('Error loading data:', error);
+                    this.hideLoading();
                 }
             }
-            
-            return data;
-        }
 
-        async function searchWorker(event) {
-            event.preventDefault();
-            
-            const workerName = document.getElementById('workerNameInput').value.trim();
-            if (!workerName) return;
+            populateMonthSelect() {
+                const months = [
+                    'January', 'February', 'March', 'April', 'May', 'June',
+                    'July', 'August', 'September', 'October', 'November', 'December'
+                ];
+                
+                this.monthSelect.innerHTML = '';
+                months.forEach((month, index) => {
+                    const option = document.createElement('option');
+                    option.value = `${this.currentYear}-${index}`;
+                    option.textContent = `${month} ${this.currentYear}`;
+                    if (index === this.currentMonth) option.selected = true;
+                    this.monthSelect.appendChild(option);
+                });
+            }
 
-            document.getElementById('loading').style.display = 'block';
-            document.getElementById('error').style.display = 'none';
+            changeMonth(value) {
+                const [year, month] = value.split('-');
+                this.currentYear = parseInt(year);
+                this.currentMonth = parseInt(month);
+                if (this.currentEmployee) {
+                    this.displayCalendar(this.currentEmployee);
+                }
+            }
 
-            // Load data if not already loaded
-            if (attendanceData.length === 0) {
-                const loaded = await loadAttendanceData();
-                if (!loaded) {
-                    document.getElementById('loading').style.display = 'none';
-                    document.getElementById('error').style.display = 'block';
+            handleSearch(query) {
+                if (query.length === 0) {
+                    this.hideSuggestions();
+                    this.hideCalendar();
                     return;
                 }
-            }
 
-            // Search for worker (case insensitive)
-            const workerData = attendanceData.filter(record => 
-                record.workerName.toLowerCase().includes(workerName.toLowerCase())
-            );
+                const matches = this.employees.filter(name => 
+                    name.toLowerCase().includes(query.toLowerCase())
+                );
 
-            document.getElementById('loading').style.display = 'none';
-
-            if (workerData.length === 0) {
-                document.getElementById('error').style.display = 'block';
-                return;
-            }
-
-            // Get exact worker name from data
-            currentWorker = workerData[0].workerName;
-            showWorkerView(currentWorker);
-        }
-
-        function showWorkerView(workerName) {
-            document.getElementById('searchView').style.display = 'none';
-            document.getElementById('workerView').style.display = 'block';
-            
-            renderWorkerData(workerName);
-        }
-
-        function showSearchView() {
-            document.getElementById('searchView').style.display = 'block';
-            document.getElementById('workerView').style.display = 'none';
-            document.getElementById('workerNameInput').value = '';
-            
-            // Reset to current month
-            currentMonth = new Date().getMonth();
-            currentYear = new Date().getFullYear();
-            
-            // Show new quote
-            showRandomQuote();
-        }
-
-        function renderWorkerData(workerName) {
-            const workerData = attendanceData.filter(record => record.workerName === workerName);
-            
-            // Calculate stats
-            const totalDays = workerData.length;
-            const totalOT = workerData.reduce((sum, record) => sum + (record.otHours || 0), 0);
-            const avgHours = totalDays > 0 ? (workerData.reduce((sum, record) => sum + record.totalManhours, 0) / totalDays).toFixed(1) : 0;
-            const presentDays = workerData.filter(record => record.endShiftManhours >= 8).length;
-            const attendanceRate = totalDays > 0 ? ((presentDays / totalDays) * 100).toFixed(1) : 0;
-            
-            const workerResult = document.getElementById('workerResult');
-            workerResult.innerHTML = `
-                <div class="worker-header">
-                    <div class="worker-name">${workerName}</div>
-                    <div class="worker-welcome">Here's your attendance overview</div>
-                </div>
-                
-                <div class="worker-stats">
-                    <div class="stat-card">
-                        <div class="stat-number">${totalDays}</div>
-                        <div class="stat-label">Total Days</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number">${presentDays}</div>
-                        <div class="stat-label">Present Days</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number">${attendanceRate}%</div>
-                        <div class="stat-label">Attendance Rate</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number">${totalOT}</div>
-                        <div class="stat-label">OT Hours</div>
-                    </div>
-                </div>
-                
-                <div class="calendar-container">
-                    <div class="month-nav">
-                        <button onclick="changeMonth(-1)">‹ Previous</button>
-                        <div class="current-month">${monthNames[currentMonth]} ${currentYear}</div>
-                        <button onclick="changeMonth(1)">Next ›</button>
-                    </div>
-                    
-                    <div class="calendar-grid" id="workerCalendar">
-                        ${generateCalendar(workerName, currentMonth, currentYear)}
-                    </div>
-                </div>
-            `;
-        }
-
-        function generateCalendar(workerName, month, year) {
-            const firstDay = new Date(year, month, 1);
-            const lastDay = new Date(year, month + 1, 0);
-            const startDate = new Date(firstDay);
-            startDate.setDate(startDate.getDate() - firstDay.getDay());
-            
-            let html = '';
-            
-            // Add day headers
-            dayNames.forEach(day => {
-                html += `<div class="calendar-header">${day}</div>`;
-            });
-            
-            // Generate calendar days
-            const currentDate = new Date(startDate);
-            for (let i = 0; i < 42; i++) { // 6 weeks
-                const dateStr = currentDate.toISOString().split('T')[0];
-                const isCurrentMonth = currentDate.getMonth() === month;
-                const dayNum = currentDate.getDate();
-                
-                let dayClass = 'calendar-day';
-                let content = dayNum;
-                let otIndicator = '';
-                
-                if (!isCurrentMonth) {
-                    dayClass += ' empty';
-                    content = '';
+                if (matches.length === 1 && matches[0].toLowerCase() === query.toLowerCase()) {
+                    this.selectEmployee(matches[0]);
+                    this.hideSuggestions();
                 } else {
-                    const attendance = attendanceData.find(record => {
-                        const recordDate = new Date(record.date);
-                        const currentCalendarDate = new Date(currentDate);
-                        return record.workerName === workerName && 
-                               recordDate.toDateString() === currentCalendarDate.toDateString();
+                    this.showSuggestions(matches);
+                }
+            }
+
+            showSuggestions(matches = this.employees) {
+                if (matches.length === 0) {
+                    this.hideSuggestions();
+                    return;
+                }
+
+                this.suggestionsDiv.innerHTML = '';
+                matches.slice(0, 10).forEach(name => {
+                    const div = document.createElement('div');
+                    div.className = 'px-4 py-2 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0';
+                    div.textContent = name;
+                    div.addEventListener('click', () => {
+                        this.searchInput.value = name;
+                        this.selectEmployee(name);
+                        this.hideSuggestions();
                     });
+                    this.suggestionsDiv.appendChild(div);
+                });
+                this.suggestionsDiv.classList.remove('hidden');
+            }
+
+            hideSuggestions() {
+                this.suggestionsDiv.classList.add('hidden');
+            }
+
+            selectEmployee(name) {
+                this.currentEmployee = name;
+                this.displayCalendar(name);
+            }
+
+            displayCalendar(employeeName) {
+                const employeeData = this.attendanceData.filter(row => row.Name === employeeName);
+                
+                if (employeeData.length === 0) {
+                    this.showNoResults();
+                    return;
+                }
+
+                this.hideNoResults();
+                this.employeeName.textContent = employeeName;
+                
+                const monthNames = [
+                    'January', 'February', 'March', 'April', 'May', 'June',
+                    'July', 'August', 'September', 'October', 'November', 'December'
+                ];
+                this.monthYear.textContent = `${monthNames[this.currentMonth]} ${this.currentYear}`;
+
+                this.renderCalendarGrid(employeeData);
+                this.renderStats(employeeData);
+                this.showCalendar();
+            }
+
+            renderCalendarGrid(employeeData) {
+                const firstDay = new Date(this.currentYear, this.currentMonth, 1);
+                const lastDay = new Date(this.currentYear, this.currentMonth + 1, 0);
+                const startDate = new Date(firstDay);
+                startDate.setDate(startDate.getDate() - firstDay.getDay());
+
+                this.calendar.innerHTML = '';
+
+                // Header row
+                const dayHeaders = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+                dayHeaders.forEach(day => {
+                    const cell = document.createElement('div');
+                    cell.className = 'day-cell header-day';
+                    cell.textContent = day;
+                    this.calendar.appendChild(cell);
+                });
+
+                // Calendar days
+                const currentDate = new Date(startDate);
+                for (let i = 0; i < 42; i++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'day-cell';
                     
-                    if (attendance) {
-                        const hours = attendance.endShiftManhours;
-                        const otHours = attendance.otHours || 0;
+                    if (currentDate.getMonth() === this.currentMonth) {
+                        const dateStr = currentDate.toISOString().split('T')[0];
+                        const attendance = employeeData.find(row => {
+                            const rowDate = new Date(row.Date);
+                            return rowDate.toISOString().split('T')[0] === dateStr;
+                        });
+
+                        cell.textContent = currentDate.getDate();
                         
-                        if (hours >= 8) {
-                            dayClass += ' present';
-                            if (otHours > 0) {
-                                otIndicator = `<div class="ot-indicator">P${otHours}</div>`;
-                            } else {
-                                otIndicator = `<div class="ot-indicator">P</div>`;
+                        if (attendance) {
+                            if (attendance.Status === 'Present') {
+                                if (attendance.OvertimeHours && parseFloat(attendance.OvertimeHours) > 0) {
+                                    cell.className += ' present-overtime';
+                                    cell.textContent = `P${attendance.OvertimeHours}`;
+                                } else {
+                                    cell.className += ' present';
+                                    cell.textContent = 'P';
+                                }
+                            } else if (attendance.Status === 'Absent') {
+                                cell.className += ' absent';
+                                cell.textContent = 'A';
                             }
-                        } else if (hours > 0) {
-                            dayClass += ' partial';
-                            otIndicator = `<div class="ot-indicator">${hours}h</div>`;
+                            
+                            cell.title = `${dateStr}: ${attendance.Status}${attendance.OvertimeHours ? ` (${attendance.OvertimeHours}h OT)` : ''}`;
+                        } else {
+                            cell.className += ' empty';
                         }
                     } else {
-                        const today = new Date();
-                        today.setHours(0, 0, 0, 0);
-                        const checkDate = new Date(currentDate);
-                        checkDate.setHours(0, 0, 0, 0);
-                        
-                        if (checkDate <= today) {
-                            dayClass += ' absent';
-                        }
+                        cell.className += ' empty';
+                        cell.textContent = currentDate.getDate();
                     }
+
+                    this.calendar.appendChild(cell);
+                    currentDate.setDate(currentDate.getDate() + 1);
                 }
-                
-                html += `<div class="${dayClass}">${content}${otIndicator}</div>`;
-                currentDate.setDate(currentDate.getDate() + 1);
             }
-            
-            return html;
-        }
 
-        function changeMonth(direction) {
-            currentMonth += direction;
-            if (currentMonth > 11) {
-                currentMonth = 0;
-                currentYear++;
-            } else if (currentMonth < 0) {
-                currentMonth = 11;
-                currentYear--;
+            renderStats(employeeData) {
+                const monthData = employeeData.filter(row => {
+                    const date = new Date(row.Date);
+                    return date.getMonth() === this.currentMonth && date.getFullYear() === this.currentYear;
+                });
+
+                const present = monthData.filter(row => row.Status === 'Present').length;
+                const absent = monthData.filter(row => row.Status === 'Absent').length;
+                const totalOT = monthData.reduce((sum, row) => {
+                    return sum + (parseFloat(row.OvertimeHours) || 0);
+                }, 0);
+                const avgOT = present > 0 ? (totalOT / present).toFixed(1) : 0;
+
+                this.stats.innerHTML = `
+                    <div class="bg-green-50 p-4 rounded-lg">
+                        <div class="text-2xl font-bold text-green-600">${present}</div>
+                        <div class="text-sm text-gray-600">Present Days</div>
+                    </div>
+                    <div class="bg-red-50 p-4 rounded-lg">
+                        <div class="text-2xl font-bold text-red-600">${absent}</div>
+                        <div class="text-sm text-gray-600">Absent Days</div>
+                    </div>
+                    <div class="bg-blue-50 p-4 rounded-lg">
+                        <div class="text-2xl font-bold text-blue-600">${totalOT}h</div>
+                        <div class="text-sm text-gray-600">Total Overtime</div>
+                    </div>
+                    <div class="bg-purple-50 p-4 rounded-lg">
+                        <div class="text-2xl font-bold text-purple-600">${avgOT}h</div>
+                        <div class="text-sm text-gray-600">Avg OT/Day</div>
+                    </div>
+                `;
             }
-            
-            const calendar = document.getElementById('workerCalendar');
-            const monthNav = calendar.previousElementSibling;
-            
-            calendar.innerHTML = generateCalendar(currentWorker, currentMonth, currentYear);
-            monthNav.querySelector('.current-month').textContent = `${monthNames[currentMonth]} ${currentYear}`;
+
+            showLoading() {
+                this.loading.classList.remove('hidden');
+                this.calendarSection.classList.add('hidden');
+                this.noResults.classList.add('hidden');
+            }
+
+            hideLoading() {
+                this.loading.classList.add('hidden');
+            }
+
+            showCalendar() {
+                this.calendarSection.classList.remove('hidden');
+                this.noResults.classList.add('hidden');
+            }
+
+            hideCalendar() {
+                this.calendarSection.classList.add('hidden');
+            }
+
+            showNoResults() {
+                this.noResults.classList.remove('hidden');
+                this.calendarSection.classList.add('hidden');
+            }
+
+            hideNoResults() {
+                this.noResults.classList.add('hidden');
+            }
         }
 
-        function showRandomQuote() {
-            const randomQuote = motivationalQuotes[Math.floor(Math.random() * motivationalQuotes.length)];
-            document.getElementById('quoteText').textContent = randomQuote.text;
-            document.getElementById('quoteAuthor').textContent = `- ${randomQuote.author}`;
-        }
-
-        // Initialize page
-        window.addEventListener('load', () => {
-            showRandomQuote();
-            // Preload data in background
-            loadAttendanceData();
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', () => {
+            new AttendanceCalendar();
         });
-
-        // Change quote every 10 seconds
-        setInterval(showRandomQuote, 10000);
-
-        function submitReport(event) {
-            event.preventDefault();
-            
-            const formData = {
-                workerName: currentWorker,
-                date: document.getElementById('reportDate').value,
-                reportType: document.getElementById('reportType').value,
-                supervisorName: document.getElementById('supervisorName').value,
-                workHours: document.getElementById('workHours').value,
-                otHours: document.getElementById('otHours').value || 0,
-                comments: document.getElementById('reportComments').value,
-                submittedAt: new Date().toLocaleString()
-            };
-
-            // Format report type for display
-            const reportTypeText = {
-                'missing_attendance': 'Missing Attendance',
-                'missing_ot': 'Missing Overtime',
-                'incorrect_hours': 'Incorrect Hours'
-            };
-
-            // Create WhatsApp message
-            let message = `*ATTENDANCE REPORT REQUEST*\n\n`;
-            message += `Worker Name: ${formData.workerName}\n`;
-            message += `Date: ${formData.date}\n`;
-            message += `Issue Type: ${reportTypeText[formData.reportType]}\n`;
-            message += `Supervisor: ${formData.supervisorName}\n`;
-            message += `Work Hours: ${formData.workHours}\n`;
-            
-            if (formData.otHours > 0) {
-                message += `OT Hours: ${formData.otHours}\n`;
-            }
-            
-            if (formData.comments) {
-                message += `Comments: ${formData.comments}\n`;
-            }
-            
-            message += `\nSubmitted: ${formData.submittedAt}`;
-
-            // Encode message for WhatsApp URL
-            const encodedMessage = encodeURIComponent(message);
-            const whatsappURL = `https://wa.me/918007389008?text=${encodedMessage}`;
-            
-            // Open WhatsApp
-            window.open(whatsappURL, '_blank');
-            
-            // Reset form after opening WhatsApp
-            document.querySelector('.report-form').reset();
-        }
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9711161927e66ef8',t:'MTc1NTUxNjcwMi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9731c6c7f0b79361',t:'MTc1NTg1OTQ4My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
