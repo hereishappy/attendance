@@ -174,8 +174,8 @@
                     Papa.parse(csvText, {
                         header: true,
                         complete: (results) => {
-                            this.attendanceData = results.data.filter(row => row.Name && row.Date);
-                            this.employees = [...new Set(this.attendanceData.map(row => row.Name))].sort();
+                            this.attendanceData = results.data.filter(row => row['EMP NAME'] && row.Date);
+                            this.employees = [...new Set(this.attendanceData.map(row => row['EMP NAME']))].sort();
                             this.hideLoading();
                         },
                         error: (error) => {
@@ -283,7 +283,7 @@
             }
 
             displayCalendar(employeeName) {
-                const employeeData = this.attendanceData.filter(row => row.Name === employeeName);
+                const employeeData = this.attendanceData.filter(row => row['EMP NAME'] === employeeName);
                 
                 if (employeeData.length === 0) {
                     this.showNoResults();
@@ -337,20 +337,23 @@
                         cell.textContent = currentDate.getDate();
                         
                         if (attendance) {
-                            if (attendance.Status === 'Present') {
-                                if (attendance.OvertimeHours && parseFloat(attendance.OvertimeHours) > 0) {
+                            const shiftHours = parseFloat(attendance['Shift Hours']) || 0;
+                            const otHours = parseFloat(attendance['OT HOURS']) || 0;
+                            
+                            if (shiftHours > 0) {
+                                if (otHours > 0) {
                                     cell.className += ' present-overtime';
-                                    cell.textContent = `P${attendance.OvertimeHours}`;
+                                    cell.textContent = `P${otHours}`;
                                 } else {
                                     cell.className += ' present';
                                     cell.textContent = 'P';
                                 }
-                            } else if (attendance.Status === 'Absent') {
+                                cell.title = `${dateStr}: Present (${shiftHours}h shift${otHours > 0 ? `, ${otHours}h OT` : ''})`;
+                            } else {
                                 cell.className += ' absent';
                                 cell.textContent = 'A';
+                                cell.title = `${dateStr}: Absent`;
                             }
-                            
-                            cell.title = `${dateStr}: ${attendance.Status}${attendance.OvertimeHours ? ` (${attendance.OvertimeHours}h OT)` : ''}`;
                         } else {
                             cell.className += ' empty';
                         }
@@ -370,10 +373,10 @@
                     return date.getMonth() === this.currentMonth && date.getFullYear() === this.currentYear;
                 });
 
-                const present = monthData.filter(row => row.Status === 'Present').length;
-                const absent = monthData.filter(row => row.Status === 'Absent').length;
+                const present = monthData.filter(row => parseFloat(row['Shift Hours']) > 0).length;
+                const absent = monthData.filter(row => parseFloat(row['Shift Hours']) === 0 || !row['Shift Hours']).length;
                 const totalOT = monthData.reduce((sum, row) => {
-                    return sum + (parseFloat(row.OvertimeHours) || 0);
+                    return sum + (parseFloat(row['OT HOURS']) || 0);
                 }, 0);
                 const avgOT = present > 0 ? (totalOT / present).toFixed(1) : 0;
 
@@ -431,5 +434,5 @@
             new AttendanceCalendar();
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9731d66a32563228',t:'MTc1NTg2MDEyMy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9731dc0715a731dc',t:'MTc1NTg2MDM1My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
