@@ -58,10 +58,10 @@
                 </div>
                 <div class="flex gap-2">
                     <button 
-                        id="refreshBtn" 
+                        id="searchBtn" 
                         class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                     >
-                        Refresh Data
+                        Search
                     </button>
                     <select id="monthSelect" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
                         <!-- Options will be populated by JavaScript -->
@@ -80,7 +80,7 @@
         </div>
 
         <!-- Calendar Section -->
-        <div id="calendarSection" class="bg-white rounded-lg shadow-md p-6 hidden">
+        <div id="calendarSection" class="bg-white rounded-lg shadow-md p-6" style="display: none;">
             <div class="flex justify-between items-center mb-6">
                 <h2 id="employeeName" class="text-2xl font-bold text-gray-800"></h2>
                 <div id="monthYear" class="text-lg font-semibold text-gray-600"></div>
@@ -149,7 +149,7 @@
                 this.employeeName = document.getElementById('employeeName');
                 this.monthYear = document.getElementById('monthYear');
                 this.stats = document.getElementById('stats');
-                this.refreshBtn = document.getElementById('refreshBtn');
+                this.searchBtn = document.getElementById('searchBtn');
                 this.monthSelect = document.getElementById('monthSelect');
             }
 
@@ -161,7 +161,7 @@
                         this.hideSuggestions();
                     }
                 });
-                this.refreshBtn.addEventListener('click', () => this.loadData());
+                this.searchBtn.addEventListener('click', () => this.performSearch());
                 this.monthSelect.addEventListener('change', (e) => this.changeMonth(e.target.value));
             }
 
@@ -211,6 +211,25 @@
                 this.currentMonth = parseInt(month);
                 if (this.currentEmployee) {
                     this.displayCalendar(this.currentEmployee);
+                }
+            }
+
+            performSearch() {
+                const query = this.searchInput.value.trim();
+                if (!query) {
+                    alert('Please enter an employee name');
+                    return;
+                }
+
+                const exactMatch = this.employees.find(name => 
+                    name.toLowerCase() === query.toLowerCase()
+                );
+
+                if (exactMatch) {
+                    this.selectEmployee(exactMatch);
+                    this.hideSuggestions();
+                } else {
+                    this.showNoResults();
                 }
             }
 
@@ -380,7 +399,7 @@
 
             showLoading() {
                 this.loading.classList.remove('hidden');
-                this.calendarSection.classList.add('hidden');
+                this.calendarSection.style.display = 'none';
                 this.noResults.classList.add('hidden');
             }
 
@@ -389,17 +408,17 @@
             }
 
             showCalendar() {
-                this.calendarSection.classList.remove('hidden');
+                this.calendarSection.style.display = 'block';
                 this.noResults.classList.add('hidden');
             }
 
             hideCalendar() {
-                this.calendarSection.classList.add('hidden');
+                this.calendarSection.style.display = 'none';
             }
 
             showNoResults() {
                 this.noResults.classList.remove('hidden');
-                this.calendarSection.classList.add('hidden');
+                this.calendarSection.style.display = 'none';
             }
 
             hideNoResults() {
@@ -412,5 +431,5 @@
             new AttendanceCalendar();
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9731c6c7f0b79361',t:'MTc1NTg1OTQ4My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9731d66a32563228',t:'MTc1NTg2MDEyMy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
