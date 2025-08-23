@@ -15,13 +15,17 @@
         .day-cell {
             aspect-ratio: 1;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            font-size: 0.875rem;
+            font-size: 0.75rem;
             font-weight: 500;
             border-radius: 4px;
             cursor: pointer;
             transition: all 0.2s;
+            text-align: center;
+            line-height: 1.1;
+            padding: 2px;
         }
         .day-cell:hover {
             transform: scale(1.05);
@@ -336,6 +340,11 @@
 
                         cell.textContent = currentDate.getDate();
                         
+                        const monthAbbrevs = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+                        const monthAbbrev = monthAbbrevs[currentDate.getMonth()];
+                        const dayNum = currentDate.getDate();
+                        const dateDisplay = `${dayNum}${monthAbbrev}`;
+                        
                         if (attendance) {
                             const shiftHours = parseFloat(attendance['Shift Hours']) || 0;
                             const otHours = parseFloat(attendance['OT HOURS']) || 0;
@@ -343,19 +352,20 @@
                             if (shiftHours > 0) {
                                 if (otHours > 0) {
                                     cell.className += ' present-overtime';
-                                    cell.textContent = `P${otHours}`;
+                                    cell.innerHTML = `<div>${dateDisplay}</div><div>P${otHours}</div>`;
                                 } else {
                                     cell.className += ' present';
-                                    cell.textContent = 'P';
+                                    cell.innerHTML = `<div>${dateDisplay}</div><div>P</div>`;
                                 }
                                 cell.title = `${dateStr}: Present (${shiftHours}h shift${otHours > 0 ? `, ${otHours}h OT` : ''})`;
                             } else {
                                 cell.className += ' absent';
-                                cell.textContent = 'A';
+                                cell.innerHTML = `<div>${dateDisplay}</div><div>A</div>`;
                                 cell.title = `${dateStr}: Absent`;
                             }
                         } else {
                             cell.className += ' empty';
+                            cell.textContent = dateDisplay;
                         }
                     } else {
                         cell.className += ' empty';
@@ -434,5 +444,5 @@
             new AttendanceCalendar();
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9731dc0715a731dc',t:'MTc1NTg2MDM1My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9738a1f2c3856ebe',t:'MTc1NTkzMTM3NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
