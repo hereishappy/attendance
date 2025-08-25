@@ -251,13 +251,46 @@
             const attendanceDays = {};
 
             currentEmployeeData.forEach(record => {
-                const date = record['Date'];
+                const dateStr = record['Date'];
                 const shiftHours = parseFloat(record['Shift Hours']) || 0;
                 const otHours = parseFloat(record['OT HOURS']) || 0;
 
-                if (shiftHours > 0) {
+                // Parse different date formats and convert to YYYY-MM-DD
+                let normalizedDate = '';
+                if (dateStr) {
+                    try {
+                        // Handle various date formats
+                        let parsedDate;
+                        if (dateStr.includes('/')) {
+                            // Handle MM/DD/YYYY or DD/MM/YYYY format
+                            const parts = dateStr.split('/');
+                            if (parts.length === 3) {
+                                // Assume DD/MM/YYYY format (common in many regions)
+                                parsedDate = new Date(parts[2], parts[1] - 1, parts[0]);
+                                // If invalid, try MM/DD/YYYY
+                                if (isNaN(parsedDate.getTime())) {
+                                    parsedDate = new Date(parts[2], parts[0] - 1, parts[1]);
+                                }
+                            }
+                        } else if (dateStr.includes('-')) {
+                            // Handle YYYY-MM-DD format
+                            parsedDate = new Date(dateStr);
+                        } else {
+                            // Try to parse as is
+                            parsedDate = new Date(dateStr);
+                        }
+                        
+                        if (!isNaN(parsedDate.getTime())) {
+                            normalizedDate = parsedDate.toISOString().split('T')[0];
+                        }
+                    } catch (e) {
+                        console.log('Date parsing error for:', dateStr);
+                    }
+                }
+
+                if (shiftHours > 0 && normalizedDate) {
                     totalPresent++;
-                    attendanceDays[date] = {
+                    attendanceDays[normalizedDate] = {
                         present: true,
                         overtime: otHours > 0,
                         otHours: otHours
@@ -266,6 +299,8 @@
                 
                 totalOvertime += otHours;
             });
+
+            console.log('Attendance days:', attendanceDays); // Debug log
 
             document.getElementById('totalPresent').textContent = totalPresent;
             document.getElementById('totalOvertime').textContent = totalOvertime.toFixed(1);
@@ -471,5 +506,5 @@
             document.getElementById('errorMessage').classList.add('hidden');
         }
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'974a14bdb3877fe5',t:'MTc1NjExNDMzNC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'974a18ea03952dff',t:'MTc1NjExNDUwNS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
