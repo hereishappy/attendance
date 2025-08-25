@@ -505,7 +505,7 @@
 
         function displaySummary() {
             const totalDays = employeeData.length;
-            const totalHours = employeeData.reduce((sum, record) => sum + (parseInt(record['Hours']) || 0), 0);
+            const totalHours = employeeData.reduce((sum, record) => sum + (parseInt(record['Shift Hours']) || parseInt(record['Hours']) || 0), 0);
             const overtimeHours = employeeData.reduce((sum, record) => sum + (parseInt(record['OT HOURS']) || 0), 0);
 
             document.getElementById('totalDays').textContent = totalDays;
@@ -546,7 +546,7 @@
                     if (!isNaN(day)) {
                         attendanceMap[day] = {
                             present: true,
-                            hours: parseInt(record['Hours']) || 0,
+                            hours: parseInt(record['Shift Hours']) || parseInt(record['Hours']) || 0,
                             overtime: parseInt(record['OT HOURS']) || 0
                         };
                     }
@@ -619,7 +619,7 @@
 
             // Summary statistics
             const totalDays = employeeData.length;
-            const totalHours = employeeData.reduce((sum, record) => sum + (parseInt(record['Hours']) || 0), 0);
+            const totalHours = employeeData.reduce((sum, record) => sum + (parseInt(record['Shift Hours']) || parseInt(record['Hours']) || 0), 0);
             const overtimeHours = employeeData.reduce((sum, record) => sum + (parseInt(record['OT HOURS']) || 0), 0);
 
             ctx.font = '18px Arial';
@@ -662,7 +662,7 @@
                     if (!isNaN(day)) {
                         attendanceMap[day] = {
                             present: true,
-                            hours: parseInt(record['Hours']) || 0,
+                            hours: parseInt(record['Shift Hours']) || parseInt(record['Hours']) || 0,
                             overtime: parseInt(record['OT HOURS']) || 0
                         };
                     }
@@ -780,7 +780,7 @@
                     record['Date'] || '',
                     record['Supervisor'] || '',
                     record['EMP NAME'] || '',
-                    record['Hours'] || '0',
+                    record['Shift Hours'] || record['Hours'] || '8',
                     record['OT HOURS'] || '0'
                 ];
 
