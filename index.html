@@ -35,7 +35,12 @@
         }
         
         .overtime-day {
-            background: linear-gradient(135deg, #f59e0b, #d97706);
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            color: white;
+        }
+        
+        .sunday-day {
+            background: linear-gradient(135deg, #0ea5e9, #0284c7);
             color: white;
         }
         
@@ -126,14 +131,18 @@
             </div>
 
             <!-- Legend -->
-            <div class="flex justify-center space-x-4 text-xs mb-4">
+            <div class="flex justify-center space-x-3 text-xs mb-4 flex-wrap">
                 <div class="flex items-center">
                     <div class="w-3 h-3 bg-green-500 rounded mr-1"></div>
                     <span>Present</span>
                 </div>
                 <div class="flex items-center">
-                    <div class="w-3 h-3 bg-orange-500 rounded mr-1"></div>
+                    <div class="w-3 h-3 bg-yellow-500 rounded mr-1"></div>
                     <span>Overtime</span>
+                </div>
+                <div class="flex items-center">
+                    <div class="w-3 h-3 bg-sky-500 rounded mr-1"></div>
+                    <span>Sunday</span>
                 </div>
                 <div class="flex items-center">
                     <div class="w-3 h-3 bg-gray-300 rounded mr-1"></div>
@@ -291,21 +300,38 @@
                 
                 const dayNumber = document.createElement('div');
                 dayNumber.textContent = currentDate.getDate();
+                dayNumber.className = 'font-semibold';
                 dayElement.appendChild(dayNumber);
 
                 if (currentDate.getMonth() === month) {
-                    if (attendanceDays[dateStr]) {
+                    const isSunday = currentDate.getDay() === 0;
+                    
+                    if (isSunday) {
+                        dayElement.classList.add('sunday-day');
+                        const sundayLabel = document.createElement('div');
+                        sundayLabel.textContent = 'SUN';
+                        sundayLabel.className = 'text-xs font-medium';
+                        dayElement.appendChild(sundayLabel);
+                    } else if (attendanceDays[dateStr]) {
                         if (attendanceDays[dateStr].overtime) {
                             dayElement.classList.add('overtime-day');
                             const otLabel = document.createElement('div');
-                            otLabel.textContent = 'OT';
-                            otLabel.className = 'text-xs';
+                            otLabel.textContent = `OT: ${attendanceDays[dateStr].otHours}h`;
+                            otLabel.className = 'text-xs font-medium';
                             dayElement.appendChild(otLabel);
                         } else if (attendanceDays[dateStr].present) {
                             dayElement.classList.add('present-day');
+                            const presentLabel = document.createElement('div');
+                            presentLabel.textContent = 'P';
+                            presentLabel.className = 'text-xs font-medium';
+                            dayElement.appendChild(presentLabel);
                         }
                     } else {
                         dayElement.classList.add('absent-day');
+                        const absentLabel = document.createElement('div');
+                        absentLabel.textContent = 'A';
+                        absentLabel.className = 'text-xs';
+                        dayElement.appendChild(absentLabel);
                     }
                 } else {
                     dayElement.classList.add('absent-day');
@@ -445,5 +471,5 @@
             document.getElementById('errorMessage').classList.add('hidden');
         }
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'974a0c4d542085fa',t:'MTc1NjExMzk4OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'974a14bdb3877fe5',t:'MTc1NjExNDMzNC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
