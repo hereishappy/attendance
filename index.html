@@ -590,9 +590,12 @@
             const canvas = document.getElementById('reportCanvas');
             const ctx = canvas.getContext('2d');
             
-            // Set canvas size for high quality
+            // Calculate canvas height based on data
+            const baseHeight = 1200;
+            const tableRowHeight = 25;
+            const additionalHeight = Math.max(employeeData.length * tableRowHeight, 300);
             canvas.width = 800;
-            canvas.height = 1000;
+            canvas.height = baseHeight + additionalHeight;
 
             // Clear canvas with white background
             ctx.fillStyle = 'white';
@@ -628,25 +631,25 @@
 
             // Calendar grid
             const startY = 280;
-            const cellSize = 100;
+            const cellSize = 85;
             const gridStartX = 50;
 
             // Draw month header
             ctx.fillStyle = '#34495e';
-            ctx.fillRect(gridStartX, startY, cellSize * 7, 40);
+            ctx.fillRect(gridStartX, startY, cellSize * 7, 35);
             ctx.fillStyle = 'white';
-            ctx.font = 'bold 18px Arial';
+            ctx.font = 'bold 16px Arial';
             ctx.textAlign = 'center';
-            ctx.fillText('August 2025', gridStartX + (cellSize * 7) / 2, startY + 25);
+            ctx.fillText('August 2025', gridStartX + (cellSize * 7) / 2, startY + 22);
 
             // Day headers
             const dayHeaders = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
             ctx.fillStyle = '#34495e';
             dayHeaders.forEach((day, index) => {
-                ctx.fillRect(gridStartX + index * cellSize, startY + 40, cellSize, 30);
+                ctx.fillRect(gridStartX + index * cellSize, startY + 35, cellSize, 25);
                 ctx.fillStyle = 'white';
-                ctx.font = 'bold 14px Arial';
-                ctx.fillText(day, gridStartX + index * cellSize + cellSize / 2, startY + 58);
+                ctx.font = 'bold 12px Arial';
+                ctx.fillText(day, gridStartX + index * cellSize + cellSize / 2, startY + 50);
                 ctx.fillStyle = '#34495e';
             });
 
@@ -674,7 +677,7 @@
 
             for (let day = 1; day <= daysInMonth; day++) {
                 const x = gridStartX + currentCol * cellSize;
-                const y = startY + 70 + currentRow * cellSize;
+                const y = startY + 60 + currentRow * cellSize;
 
                 const attendance = attendanceMap[day];
 
@@ -693,15 +696,15 @@
 
                 // Draw day number
                 ctx.fillStyle = attendance && attendance.present ? '#27ae60' : '#e74c3c';
-                ctx.font = 'bold 18px Arial';
+                ctx.font = 'bold 16px Arial';
                 ctx.textAlign = 'center';
-                ctx.fillText(day.toString(), x + cellSize / 2, y + 30);
+                ctx.fillText(day.toString(), x + cellSize / 2, y + 25);
 
                 // Draw overtime if present
                 if (attendance && attendance.overtime > 0) {
                     ctx.fillStyle = '#e67e22';
-                    ctx.font = '12px Arial';
-                    ctx.fillText(`OT: ${attendance.overtime}h`, x + cellSize / 2, y + 50);
+                    ctx.font = '10px Arial';
+                    ctx.fillText(`OT: ${attendance.overtime}h`, x + cellSize / 2, y + 40);
                 }
 
                 currentCol++;
@@ -712,26 +715,106 @@
             }
 
             // Legend
-            const legendY = startY + 70 + (currentRow + 1) * cellSize + 50;
+            const legendY = startY + 60 + (currentRow + 1) * cellSize + 30;
             ctx.fillStyle = '#d5f4e6';
-            ctx.fillRect(50, legendY, 20, 20);
+            ctx.fillRect(50, legendY, 15, 15);
             ctx.strokeStyle = '#bdc3c7';
-            ctx.strokeRect(50, legendY, 20, 20);
+            ctx.strokeRect(50, legendY, 15, 15);
             ctx.fillStyle = '#2c3e50';
-            ctx.font = '14px Arial';
+            ctx.font = '12px Arial';
             ctx.textAlign = 'left';
-            ctx.fillText('Present', 80, legendY + 15);
+            ctx.fillText('Present', 75, legendY + 12);
 
             ctx.fillStyle = '#fadbd8';
-            ctx.fillRect(150, legendY, 20, 20);
-            ctx.strokeRect(150, legendY, 20, 20);
-            ctx.fillText('Absent', 180, legendY + 15);
+            ctx.fillRect(140, legendY, 15, 15);
+            ctx.strokeRect(140, legendY, 15, 15);
+            ctx.fillText('Absent', 165, legendY + 12);
+
+            // Detailed Attendance Table
+            const tableStartY = legendY + 50;
+            ctx.fillStyle = '#2c3e50';
+            ctx.font = 'bold 18px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('DETAILED ATTENDANCE RECORD', canvas.width / 2, tableStartY);
+
+            // Table headers
+            const tableHeaderY = tableStartY + 40;
+            const colWidths = [120, 140, 200, 80, 80];
+            const colPositions = [50, 170, 310, 510, 590];
+            const headers = ['Date', 'Supervisor', 'EMP NAME', 'Shift Hours', 'OT HOURS'];
+
+            // Draw table header background
+            ctx.fillStyle = '#34495e';
+            ctx.fillRect(50, tableHeaderY - 20, 720, 25);
+
+            // Draw table headers
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 14px Arial';
+            ctx.textAlign = 'center';
+            headers.forEach((header, index) => {
+                ctx.fillText(header, colPositions[index] + colWidths[index] / 2, tableHeaderY - 5);
+            });
+
+            // Sort employee data by date
+            const sortedData = [...employeeData].sort((a, b) => {
+                const dateA = new Date(a['Date'].replace(/(\d+)\s+(\w+)\s+(\d+)/, '$2 $1, $3'));
+                const dateB = new Date(b['Date'].replace(/(\d+)\s+(\w+)\s+(\d+)/, '$2 $1, $3'));
+                return dateA - dateB;
+            });
+
+            // Draw table rows
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'center';
+            sortedData.forEach((record, index) => {
+                const rowY = tableHeaderY + 25 + (index * tableRowHeight);
+                
+                // Alternate row background
+                if (index % 2 === 0) {
+                    ctx.fillStyle = '#f8f9fa';
+                    ctx.fillRect(50, rowY - 15, 720, tableRowHeight);
+                }
+
+                // Draw row data
+                ctx.fillStyle = '#2c3e50';
+                const rowData = [
+                    record['Date'] || '',
+                    record['Supervisor'] || '',
+                    record['EMP NAME'] || '',
+                    record['Hours'] || '0',
+                    record['OT HOURS'] || '0'
+                ];
+
+                rowData.forEach((data, colIndex) => {
+                    ctx.fillText(data.toString(), colPositions[colIndex] + colWidths[colIndex] / 2, rowY);
+                });
+
+                // Draw row border
+                ctx.strokeStyle = '#e1e8ed';
+                ctx.lineWidth = 0.5;
+                ctx.beginPath();
+                ctx.moveTo(50, rowY + 7);
+                ctx.lineTo(770, rowY + 7);
+                ctx.stroke();
+            });
+
+            // Draw table borders
+            ctx.strokeStyle = '#bdc3c7';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(50, tableHeaderY - 20, 720, 25 + (sortedData.length * tableRowHeight));
+
+            // Vertical column separators
+            for (let i = 1; i < colPositions.length; i++) {
+                ctx.beginPath();
+                ctx.moveTo(colPositions[i], tableHeaderY - 20);
+                ctx.lineTo(colPositions[i], tableHeaderY + 5 + (sortedData.length * tableRowHeight));
+                ctx.stroke();
+            }
 
             // Instructions in Hindi
+            const instructionY = tableHeaderY + 50 + (sortedData.length * tableRowHeight);
             ctx.font = '16px Arial';
             ctx.fillStyle = '#856404';
             ctx.textAlign = 'center';
-            const instructionY = legendY + 60;
             ctx.fillText('यदि आपको कोई अनुपस्थित या ओवरटाइम छूट गया है,', canvas.width / 2, instructionY);
             ctx.fillText('तो कृपया अपने पर्यवेक्षक को सूचित करें।', canvas.width / 2, instructionY + 25);
 
